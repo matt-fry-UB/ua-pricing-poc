@@ -672,10 +672,10 @@ async function loadPark(park) {
   // Pipeline: calendar lookup kicks off immediately; tickets chain off it
   // so they start the moment limitId resolves, without waiting for the rest.
   const limitIdP = findLimitId(parkId);
-  const ticketsP = limitIdP.then(({ limitId }) => {
+  const ticketsP = limitIdP.then(({ limitId, date }) => {
     $('loadStep').textContent = limitId ? 'Loading day passes…' : 'No upcoming schedule found';
     return limitId
-      ? apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=2&parkAttendanceLimitId=${limitId}`)
+      ? apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=2&date=${date}&parkAttendanceLimitId=${limitId}`)
       : [];
   });
 
