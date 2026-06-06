@@ -618,6 +618,17 @@ function simpleCard(p, color) {
 </div>`;
 }
 
+/* ─── Strip city name from product names ─── */
+function makeCleaner(parkName) {
+  const city = parkName.split(',')[0].trim();
+  const esc  = city.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Tickets: "Plymouth Platinum Ticket" → city is a space-separated prefix
+  const rPre = new RegExp('^' + esc + '\\s+', 'i');
+  // Bundles/memberships: "All In All Day - Plymouth" → city follows " - " or " – "
+  const rSuf = new RegExp('\\s*[-–]\\s*' + esc + '\\s*$', 'i');
+  return name => (name || '').replace(rPre, '').replace(rSuf, '').trim();
+}
+
 /* ─── API ─── */
 async function apiFetch(url, signal) {
   const res = await fetch(url, signal ? { signal } : {});
@@ -697,7 +708,19 @@ async function loadPark(park) {
     hangoutsRaw.reduce((acc, h) => { if (!acc[h.resourceTypeId]) acc[h.resourceTypeId] = h; return acc; }, {})
   );
 
-  const data = { parkId, tickets, bundles, memberships, annualPasses, merch, packages: pkgs, hangouts };
+  const clean = makeCleaner(park.name);
+  const cleanNames = arr => arr.map(p => ({ ...p, parkProductName: clean(p.parkProductName) }));
+
+  const data = {
+    parkId,
+    tickets:      cleanNames(tickets),
+    bundles:      cleanNames(bundles),
+    memberships:  cleanNames(memberships),
+    annualPasses: cleanNames(annualPasses),
+    merch:        cleanNames(merch),
+    packages:     pkgs,  // uses productLevelName, no location prefix
+    hangouts,
+  };
   CACHE[parkId] = data;
   return data;
 }
