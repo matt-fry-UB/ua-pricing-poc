@@ -29,7 +29,7 @@
       --c-annual:   #047857;
       --c-birthday: #C2410C;
       --c-merch:    #374151;
-      --c-cafe:     #B91C1C;
+      --c-attract:  #0D9488;
 
       --font-h: 'Oswald', sans-serif;
       --font-b: 'Nunito Sans', sans-serif;
@@ -298,17 +298,42 @@
     .row-card-name { font-size: 13px; font-weight: 600; color: var(--g900); }
     .row-card-price { font-family: var(--font-h); font-size: 17px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Café load button ── */
-    .cafe-btn {
-      display: inline-flex; align-items: center; gap: 7px;
-      padding: 11px 22px; border: none; border-radius: var(--rad); cursor: pointer;
-      background: var(--c-cafe); color: white;
-      font-family: var(--font-h); font-size: 15px; font-weight: 600;
-      letter-spacing: .08em; text-transform: uppercase;
-      transition: background .18s, transform .15s;
+    /* ── Attractions grid ── */
+    .attr-grid {
+      display: grid; grid-template-columns: repeat(3,1fr);
+      gap: 0; border: 1px solid var(--g200); border-radius: 8px; overflow: hidden;
     }
-    .cafe-btn:hover { background: #991b1b; transform: translateY(-1px); }
-    .cafe-btn:disabled { opacity: .6; cursor: not-allowed; transform: none; }
+    @media (max-width: 800px) { .attr-grid { grid-template-columns: repeat(2,1fr); } }
+    @media (max-width: 480px) { .attr-grid { grid-template-columns: 1fr; } }
+    .attr-item {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 8px; padding: 10px 14px; border-right: 1px solid var(--g100);
+      border-bottom: 1px solid var(--g100);
+    }
+    .attr-item:nth-child(3n) { border-right: none; }
+    .attr-name { font-size: 13px; font-weight: 600; color: var(--g700); }
+    .attr-hr { font-size: 10px; font-weight: 700; background: #FEF3C7; color: #B45309; padding: 2px 7px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
+
+    /* ── Tier attractions matrix ── */
+    .tier-matrix { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .tier-matrix th {
+      padding: 9px 14px; text-align: center;
+      font-family: var(--font-h); font-size: 12px; font-weight: 600;
+      letter-spacing: .06em; text-transform: uppercase; color: white;
+    }
+    .tier-matrix th.attr-col { text-align: left; background: var(--g700); }
+    .tier-matrix td { padding: 8px 14px; border-top: 1px solid var(--g100); text-align: center; }
+    .tier-matrix td.attr-col { text-align: left; font-weight: 600; color: var(--g700); }
+    .tier-matrix tr:last-child td { border-bottom: none; }
+    .tier-matrix tr:hover td { background: var(--g100); }
+    .chk-yes { color: #16a34a; font-size: 16px; }
+    .chk-no  { color: var(--g300); font-size: 18px; line-height: 1; }
+
+    /* ── Common amenities ── */
+    .common-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 4px 24px; }
+    @media (max-width: 560px) { .common-grid { grid-template-columns: 1fr; } }
+    .common-item { display: flex; align-items: flex-start; gap: 7px; padding: 5px 0; font-size: 12px; color: var(--g600); border-bottom: 1px solid var(--g100); }
+    .common-item:before { content: '✓'; color: #16a34a; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 
     /* ── Error box ── */
     .err-box {
@@ -421,22 +446,16 @@
       </div>
     </section>
 
-    <section id="cafeSec" class="sec">
-      <div class="sec-head" style="background:var(--c-cafe)">
+    <section id="attractionSecT" class="sec">
+      <div class="sec-head" style="background:var(--c-attract)">
         <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
         </svg>
-        <span class="sec-title">Café Menu</span>
+        <span class="sec-title">Park Attractions</span>
       </div>
       <div class="sec-body">
-        <button id="cafeBtn" class="cafe-btn">
-          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-          </svg>
-          Load Café Menu
-        </button>
-        <div id="cafeGrid" class="grid3 hidden" style="margin-top:20px"></div>
+        <div id="attractionListT" class="attr-grid"></div>
       </div>
     </section>
 
@@ -463,6 +482,14 @@
       </div>
       <div class="sec-body">
         <div id="bdayGrid" class="grid3"></div>
+        <div id="attrMatrixSub" class="hidden">
+          <div class="hangouts-label">Attractions by Party Tier</div>
+          <div id="attrMatrix" style="overflow-x:auto"></div>
+        </div>
+        <div id="commonAmenitiesSub" class="hidden">
+          <div class="hangouts-label">Included With Every Hangout</div>
+          <div id="commonAmenitiesList" class="common-grid"></div>
+        </div>
         <div id="hangoutsSub" class="hidden">
           <div class="hangouts-label">Hangouts</div>
           <div id="hangoutsGrid" class="hangouts-row"></div>
@@ -507,6 +534,19 @@
       </div>
     </section>
 
+    <section id="attractionSecM" class="sec">
+      <div class="sec-head" style="background:var(--c-attract)">
+        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+        </svg>
+        <span class="sec-title">Park Attractions</span>
+      </div>
+      <div class="sec-body">
+        <div id="attractionListM" class="attr-grid"></div>
+      </div>
+    </section>
+
   </div><!-- /tab memberships -->
 
 </main>
@@ -530,7 +570,7 @@ const C = {
   annual:   '#047857',
   birthday: '#C2410C',
   merch:    '#374151',
-  cafe:     '#B91C1C',
+  attract:  '#0D9488',
 };
 
 /* ─── DOM helpers ─── */
@@ -693,6 +733,31 @@ async function apiFetch(url, signal) {
   return (await res.json()).data || [];
 }
 
+/* ─── Attractions helpers ─── */
+
+function extractAttractions(products) {
+  const seen = new Set(), out = [];
+  [...products]
+    .sort((a, b) => (b.productLevelId || 0) - (a.productLevelId || 0))
+    .forEach(p => (p.attractions || []).forEach(a => {
+      if (!seen.has(a.name)) { seen.add(a.name); out.push(a); }
+    }));
+  return out.sort((a, b) => (a.heightRequirement || 0) - (b.heightRequirement || 0));
+}
+
+async function loadAttractions(parkId) {
+  if (!CACHE[parkId]) CACHE[parkId] = {};
+  if ('attractions' in CACHE[parkId]) return CACHE[parkId].attractions;
+  if (!CACHE[parkId]._attrProm) {
+    CACHE[parkId]._attrProm = apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=1`)
+      .then(products => {
+        CACHE[parkId].attractions = extractAttractions(products);
+        return CACHE[parkId].attractions;
+      });
+  }
+  return CACHE[parkId]._attrProm;
+}
+
 /* ─── Calendar race: resolves on FIRST date with slots ─── */
 async function findLimitId(parkId, stepEl) {
   if (stepEl) stepEl.textContent = 'Scanning upcoming schedule…';
@@ -736,17 +801,19 @@ async function loadTickets(parkId) {
   const { limitId, date } = await findLimitId(parkId, step);
   if (step) step.textContent = limitId ? 'Loading tickets…' : 'No upcoming schedule found';
 
-  const [all, merch] = await Promise.all([
+  const [all, merch, attractions] = await Promise.all([
     limitId
       ? apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=2&date=${date}&parkAttendanceLimitId=${limitId}`)
       : [],
     apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=3`),
+    loadAttractions(parkId),
   ]);
 
   const data = {
     tickets: cleanAll(all.filter(p => p.productTypeId === 2)),
     bundles: cleanAll(all.filter(p => p.productTypeId === 11)),
     merch:   cleanAll(merch),
+    attractions,
   };
   if (!CACHE[parkId]) CACHE[parkId] = {};
   CACHE[parkId].tickets = data;
@@ -782,13 +849,74 @@ async function loadMemberships(parkId) {
     apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=1`),
     apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=7`),
   ]);
-  const data = { memberships: cleanAll(m), annualPasses: cleanAll(a) };
   if (!CACHE[parkId]) CACHE[parkId] = {};
+  /* Populate shared attractions cache as a side-effect (avoids a second fetch when tickets tab loads) */
+  if (!('attractions' in CACHE[parkId])) CACHE[parkId].attractions = extractAttractions(m);
+  const attractions = CACHE[parkId].attractions;
+  const data = { memberships: cleanAll(m), annualPasses: cleanAll(a), attractions };
   CACHE[parkId].memberships = data;
   return data;
 }
 
 /* ─── Renderers ─── */
+
+function renderAttractions(listId, secId, attractions) {
+  if (!attractions?.length) { hideSec(secId); return; }
+  $(listId).innerHTML = attractions.map(a => `
+<div class="attr-item">
+  <span class="attr-name">${a.name}</span>
+  ${a.heightRequirement ? `<span class="attr-hr">${a.heightRequirement}" min</span>` : ''}
+</div>`).join('');
+  showSec(secId);
+}
+
+function renderAttractionMatrix(packages) {
+  const sub = $('attrMatrixSub');
+  if (!packages?.length) { hideEl('attrMatrixSub'); return; }
+
+  const tiers = [...packages].sort((a, b) => a.productLevelId - b.productLevelId);
+
+  /* Collect all unique attractions in tier order */
+  const seen = new Set(), allAttractions = [];
+  tiers.forEach(pkg => (pkg.attractions || []).forEach(a => {
+    if (!seen.has(a.name)) { seen.add(a.name); allAttractions.push(a); }
+  }));
+  if (!allAttractions.length) { hideEl('attrMatrixSub'); return; }
+
+  const tierHeaders = tiers.map(t =>
+    `<th style="background:${t.productLevelColor || C.birthday}">${t.productLevelName}</th>`
+  ).join('');
+
+  const rows = allAttractions.map(a => {
+    const minLevel = a.minimumProductLevelId || 1;
+    const hrNote = a.heightRequirement ? ` <span style="font-size:10px;font-weight:400;color:var(--g400)">(${a.heightRequirement}")</span>` : '';
+    const cells = tiers.map(t =>
+      t.productLevelId >= minLevel
+        ? `<td><span class="chk-yes">✓</span></td>`
+        : `<td><span class="chk-no">—</span></td>`
+    ).join('');
+    return `<tr><td class="attr-col">${a.name}${hrNote}</td>${cells}</tr>`;
+  }).join('');
+
+  $('attrMatrix').innerHTML = `
+<table class="tier-matrix">
+  <thead><tr><th class="attr-col">Attraction</th>${tierHeaders}</tr></thead>
+  <tbody>${rows}</tbody>
+</table>`;
+  showEl('attrMatrixSub');
+}
+
+function renderCommonAmenities(hangouts) {
+  if (!hangouts?.length) { hideEl('commonAmenitiesSub'); return; }
+  const amenityLists = hangouts.map(h => h.amenities || []).filter(l => l.length);
+  if (!amenityLists.length) { hideEl('commonAmenitiesSub'); return; }
+  const common = amenityLists.reduce((acc, list) => acc.filter(a => list.includes(a)));
+  if (!common.length) { hideEl('commonAmenitiesSub'); return; }
+  $('commonAmenitiesList').innerHTML = common
+    .map(a => `<div class="common-item">${a}</div>`)
+    .join('');
+  showEl('commonAmenitiesSub');
+}
 
 function renderGrid(secId, gridId, items, cardFn) {
   if (!items?.length) { hideSec(secId); return; }
@@ -796,7 +924,7 @@ function renderGrid(secId, gridId, items, cardFn) {
   showSec(secId);
 }
 
-function renderTickets({ tickets, bundles, merch }, parkId) {
+function renderTickets({ tickets, bundles, merch, attractions }, parkId) {
   const primary   = tickets.filter(p => !isSecondaryTicket(p.parkProductName));
   const secondary = tickets.filter(p =>  isSecondaryTicket(p.parkProductName));
   if (primary.length || secondary.length) {
@@ -814,45 +942,15 @@ function renderTickets({ tickets, bundles, merch }, parkId) {
   }
   renderGrid('bundleSec', 'bundleGrid', bundles, p => ticketCard(p, C.bundle));
   renderGrid('merchSec',  'merchGrid',  merch,   p => simpleCard(p, C.merch));
-
-  /* Reset café lazy-load */
-  $('cafeGrid').innerHTML = '';
-  $('cafeGrid').classList.add('hidden');
-  $('cafeBtn').innerHTML = `
-    <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
-        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-    </svg>
-    Load Café Menu`;
-  $('cafeBtn').disabled = false;
-  $('cafeBtn').classList.remove('hidden');
-  showSec('cafeSec');
-  $('cafeBtn').onclick = async () => {
-    $('cafeBtn').textContent = 'Loading…';
-    $('cafeBtn').disabled = true;
-    try {
-      const items = await apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=4`);
-      const clean = makeCleaner(currentParkName);
-      if (items.length) {
-        $('cafeGrid').innerHTML = items
-          .map(p => simpleCard({ ...p, parkProductName: clean(p.parkProductName) }, C.cafe))
-          .join('');
-        $('cafeGrid').classList.remove('hidden');
-        $('cafeBtn').classList.add('hidden');
-      } else {
-        $('cafeBtn').textContent = 'No café items at this location';
-      }
-    } catch {
-      $('cafeBtn').textContent = 'Failed — try again';
-      $('cafeBtn').disabled = false;
-    }
-  };
+  renderAttractions('attractionListT', 'attractionSecT', attractions);
 }
 
 function renderBirthdays({ packages, hangouts }) {
   if (packages.length) {
     $('bdayGrid').innerHTML = packages.map(bdayCard).join('');
     showSec('bdaySec');
+    renderAttractionMatrix(packages);
+    renderCommonAmenities(hangouts);
     if (hangouts.length) {
       $('hangoutsGrid').innerHTML = hangouts.map(hangoutCard).join('');
       showEl('hangoutsSub');
@@ -864,9 +962,10 @@ function renderBirthdays({ packages, hangouts }) {
   }
 }
 
-function renderMemberships({ memberships, annualPasses }) {
+function renderMemberships({ memberships, annualPasses, attractions }) {
   renderGrid('memberSec', 'memberGrid', memberships,  memberCard);
   renderGrid('annualSec', 'annualGrid', annualPasses, annualCard);
+  renderAttractions('attractionListM', 'attractionSecM', attractions);
 }
 
 /* ─── Tab switching ─── */
@@ -898,7 +997,8 @@ async function switchTab(tab) {
   }
 
   /* Show inline spinner */
-  hideSec('ticketSec'); hideSec('bundleSec'); hideSec('merchSec'); hideSec('cafeSec');
+  hideSec('ticketSec'); hideSec('bundleSec'); hideSec('merchSec');
+  hideSec('attractionSecT'); hideSec('attractionSecM');
   hideSec('bdaySec'); hideSec('memberSec'); hideSec('annualSec');
   loadEl?.classList.add('on');
 
@@ -940,7 +1040,8 @@ $('sel').addEventListener('change', async e => {
   hideEl('errBox');
 
   /* Reset sections and switch to Tickets tab */
-  hideSec('ticketSec'); hideSec('bundleSec'); hideSec('merchSec'); hideSec('cafeSec');
+  hideSec('ticketSec'); hideSec('bundleSec'); hideSec('merchSec');
+  hideSec('attractionSecT'); hideSec('attractionSecM');
   hideSec('bdaySec'); hideSec('memberSec'); hideSec('annualSec');
   activeTab = 'tickets';
   document.querySelectorAll('.tab-btn').forEach(btn => {
