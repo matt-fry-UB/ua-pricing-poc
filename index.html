@@ -1072,7 +1072,11 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 (async () => {
   try {
     const parks = await apiFetch(`${API}/brands/${BRAND_ID}/parks`);
-    parks.sort((a, b) => a.name.localeCompare(b.name));
+    parks.sort((a, b) => {
+      const [cityA, stateA = ''] = a.name.split(',').map(s => s.trim());
+      const [cityB, stateB = ''] = b.name.split(',').map(s => s.trim());
+      return stateA.localeCompare(stateB) || cityA.localeCompare(cityB);
+    });
     const sel = $('sel');
     sel.innerHTML = '<option value="" disabled selected>Select a location…</option>';
     parks.forEach(p => {
