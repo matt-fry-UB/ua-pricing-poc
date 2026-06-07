@@ -809,8 +809,9 @@ async function loadTickets(parkId) {
     loadAttractions(parkId),
   ]);
 
+  const stripTicket = arr => arr.map(p => ({ ...p, parkProductName: p.parkProductName.replace(/\s+ticket$/i, '').trim() }));
   const data = {
-    tickets: cleanAll(all.filter(p => p.productTypeId === 2)),
+    tickets: stripTicket(cleanAll(all.filter(p => p.productTypeId === 2))),
     bundles: cleanAll(all.filter(p => p.productTypeId === 11)),
     merch:   cleanAll(merch),
     attractions,
@@ -853,7 +854,8 @@ async function loadMemberships(parkId) {
   /* Populate shared attractions cache as a side-effect (avoids a second fetch when tickets tab loads) */
   if (!('attractions' in CACHE[parkId])) CACHE[parkId].attractions = extractAttractions(m);
   const attractions = CACHE[parkId].attractions;
-  const data = { memberships: cleanAll(m), annualPasses: cleanAll(a), attractions };
+  const stripMembership = arr => arr.map(p => ({ ...p, parkProductName: p.parkProductName.replace(/\s+membership$/i, '').trim() }));
+  const data = { memberships: stripMembership(cleanAll(m)), annualPasses: cleanAll(a), attractions };
   CACHE[parkId].memberships = data;
   return data;
 }
