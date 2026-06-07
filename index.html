@@ -855,8 +855,7 @@ async function loadMemberships(parkId) {
   if (!('attractions' in CACHE[parkId])) CACHE[parkId].attractions = extractAttractions(m);
   const attractions = CACHE[parkId].attractions;
   const stripMembership = arr => arr.map(p => ({ ...p, parkProductName: p.parkProductName.replace(/\s+membership$/i, '').trim() }));
-  const stripPass = arr => arr.map(p => ({ ...p, parkProductName: p.parkProductName.replace(/\s+pass$/i, '').trim() }));
-  const data = { memberships: stripMembership(cleanAll(m)), annualPasses: stripPass(cleanAll(a)), attractions };
+  const data = { memberships: stripMembership(cleanAll(m)), annualPasses: stripMembership(cleanAll(a)), attractions };
   CACHE[parkId].memberships = data;
   return data;
 }
