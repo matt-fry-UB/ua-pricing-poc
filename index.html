@@ -1082,7 +1082,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     parks.forEach(p => {
       const opt = document.createElement('option');
       opt.value = JSON.stringify({ id: p.id, name: p.name });
-      opt.textContent = p.name;
+      const [city, state = ''] = p.name.split(',').map(s => s.trim());
+      opt.textContent = state ? `${state} - ${city}` : p.name;
       sel.appendChild(opt);
     });
     const saved = sessionStorage.getItem('ua_park');
