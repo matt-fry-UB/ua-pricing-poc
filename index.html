@@ -6,7 +6,7 @@
   <title>Urban Air — Pricing Explorer</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&family=Oswald:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -33,6 +33,7 @@
 
       --font-h: 'Oswald', sans-serif;
       --font-b: 'Nunito Sans', sans-serif;
+      --font-m: 'Montserrat', sans-serif;
       --rad:    12px;
       --shadow: 0 1px 3px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.07);
       --shadow-md: 0 4px 16px rgba(0,0,0,.10);
@@ -83,7 +84,7 @@
       color: rgba(255,255,255,.45); pointer-events: none;
     }
 
-    /* ── Tab bar (inside header) ── */
+    /* ── Tab bar ── */
     .tab-bar {
       display: none;
       padding: 0 20px;
@@ -128,7 +129,7 @@
       color: var(--g400); margin-top: 7px;
     }
 
-    /* ── Tab loading (inline, inside the panel) ── */
+    /* ── Tab loading ── */
     .tab-load {
       display: none; flex-direction: column; align-items: center;
       padding: 64px 0; text-align: center;
@@ -137,8 +138,8 @@
 
     /* ── Main / panels ── */
     .main {
-      display: none; flex-direction: column; gap: 36px;
-      max-width: 1280px; margin: 0 auto; padding: 32px 24px 80px;
+      display: none; flex-direction: column; gap: 0;
+      margin: 0 auto;
     }
     .main.on {
       display: flex;
@@ -146,11 +147,10 @@
     }
     @keyframes rise { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:none} }
 
-    /* Each tab panel is a flex column; hidden when not active */
-    .tab-panel { display: none; flex-direction: column; gap: 36px; }
+    .tab-panel { display: none; flex-direction: column; }
     .tab-panel.active { display: flex; }
 
-    /* ── Section ── */
+    /* ── Existing section styles (used by Birthdays + Memberships tabs) ── */
     .sec { display: none; }
     .sec.on { display: block; }
     .sec-head {
@@ -171,12 +171,13 @@
       padding: 24px;
     }
 
-    /* ── 3-col grid ── */
+    .bday-sections { display: flex; flex-direction: column; gap: 36px; padding: 32px 24px 80px; max-width: 1280px; margin: 0 auto; width: 100%; }
+    .member-sections { display: flex; flex-direction: column; gap: 36px; padding: 32px 24px 80px; max-width: 1280px; margin: 0 auto; width: 100%; }
+
     .grid3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; }
     @media (max-width: 900px) { .grid3 { grid-template-columns: repeat(2,1fr); } }
     @media (max-width: 560px) { .grid3 { grid-template-columns: 1fr; } }
 
-    /* ── Product card ── */
     .card {
       background: var(--white); border: 1px solid var(--g200);
       border-radius: var(--rad); overflow: hidden;
@@ -226,7 +227,6 @@
     }
     sup.hr:hover::after { opacity: 1; }
 
-    /* ── Secondary tickets (Parent / Shorty) — 2-col ── */
     .ticket-secondary { display: grid; grid-template-columns: repeat(2,1fr); gap: 8px; margin-top: 12px; }
     @media (max-width: 560px) { .ticket-secondary { grid-template-columns: 1fr; } }
     .ticket-secondary-card {
@@ -242,7 +242,6 @@
     }
     .ticket-secondary-desc { font-size: 11px; color: var(--g500); }
 
-    /* ── Birthday packages ── */
     .bday-card {
       border-radius: var(--rad); overflow: hidden;
       border: 1px solid var(--g200); box-shadow: var(--shadow);
@@ -265,7 +264,6 @@
     }
     .bday-desc { font-size: 12px; color: var(--g500); line-height: 1.55; }
 
-    /* ── Hangouts ── */
     .hangouts-label {
       font-size: 11px; font-weight: 700; text-transform: uppercase;
       letter-spacing: .12em; color: var(--g400);
@@ -288,7 +286,6 @@
     .amenity-list li { font-size: 11px; color: var(--g500); display: flex; gap: 5px; }
     .amenity-list li::before { content: '\2713'; color: #16a34a; font-weight: 700; flex-shrink: 0; }
 
-    /* ── Simple row card (merch / café) ── */
     .row-card {
       background: var(--white); border: 1px solid var(--g200); border-radius: 8px;
       padding: 14px 18px; display: flex; align-items: center;
@@ -298,7 +295,6 @@
     .row-card-name { font-size: 13px; font-weight: 600; color: var(--g900); }
     .row-card-price { font-family: var(--font-h); font-size: 17px; font-weight: 700; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Attractions grid ── */
     .attr-grid {
       display: grid; grid-template-columns: repeat(3,1fr);
       gap: 0; border: 1px solid var(--g200); border-radius: 8px; overflow: hidden;
@@ -314,7 +310,6 @@
     .attr-name { font-size: 13px; font-weight: 600; color: var(--g700); }
     .attr-hr { font-size: 10px; font-weight: 700; background: #FEF3C7; color: #B45309; padding: 2px 7px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
 
-    /* ── Tier attractions matrix ── */
     .tier-matrix { width: 100%; border-collapse: collapse; font-size: 13px; }
     .tier-matrix th {
       padding: 9px 14px; text-align: center;
@@ -329,13 +324,11 @@
     .chk-yes { color: #16a34a; font-size: 16px; }
     .chk-no  { color: var(--g300); font-size: 18px; line-height: 1; }
 
-    /* ── Common amenities ── */
     .common-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 4px 24px; }
     @media (max-width: 560px) { .common-grid { grid-template-columns: 1fr; } }
     .common-item { display: flex; align-items: flex-start; gap: 7px; padding: 5px 0; font-size: 12px; color: var(--g600); border-bottom: 1px solid var(--g100); }
     .common-item:before { content: '✓'; color: #16a34a; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
 
-    /* ── Error box ── */
     .err-box {
       max-width: 440px; margin: 60px auto; padding: 24px;
       background: #fef2f2; border: 1px solid #fca5a5; border-radius: var(--rad);
@@ -346,6 +339,269 @@
     .err-box p  { font-size: 13px; color: #dc2626; }
 
     .hidden { display: none !important; }
+
+    /* ══════════════════════════════════════════
+       Simplified Pricing Section (Tickets tab)
+       ══════════════════════════════════════════ */
+
+    .sp-wrap { font-family: var(--font-m); }
+
+    /* Pricing zone */
+    .sp-pricing-zone { background: #f6f2f5; padding: 64px 0; }
+    .sp-container { max-width: 1280px; margin: 0 auto; padding: 0 24px; }
+    .sp-gallery-section { background: #fff; padding: 64px 0; }
+
+    /* Header */
+    .sp-eyebrow {
+      font-size: 14px; font-weight: 800; text-transform: uppercase;
+      letter-spacing: 0.25em; color: #e50695; margin-bottom: 12px; text-align: center;
+    }
+    .sp-h1 {
+      font-size: 48px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.02em; color: #383838; margin-bottom: 12px; text-align: center;
+    }
+    @media (min-width: 768px) { .sp-h1 { font-size: 60px; } }
+    .sp-subline {
+      font-size: 18px; font-weight: 600; color: #6b7280;
+      text-align: center; margin-bottom: 40px;
+    }
+    .sp-h2 {
+      font-size: 48px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.02em; color: #383838; text-align: center;
+    }
+
+    /* Two-column panels grid */
+    .sp-panels {
+      display: grid;
+      grid-template-columns: 1.16fr 0.84fr;
+      gap: 28px;
+      align-items: stretch;
+    }
+    .sp-panels.sp-legacy     { grid-template-columns: 2.1fr 0.9fr; }
+    .sp-panels.sp-no-gokarts { grid-template-columns: 1fr 1fr; }
+    @media (max-width: 1023px) { .sp-panels { grid-template-columns: 1fr !important; } }
+
+    .sp-col { display: flex; flex-direction: column; gap: 20px; }
+
+    /* Panel cards */
+    .sp-panel-card {
+      background: #fff; border-radius: 25px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      overflow: hidden; flex-grow: 1;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .sp-panel-card:hover { transform: translateY(-6px); box-shadow: 0 18px 36px rgba(0,0,0,0.18); }
+    .sp-member-panel { background: #e50695; }
+
+    /* Ticket cells split */
+    .sp-tickets-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100%;
+    }
+    .sp-tickets-split.sp-single { grid-template-columns: 1fr; }
+    .sp-tickets-split.sp-triple { grid-template-columns: repeat(3, 1fr); }
+    @media (max-width: 639px) {
+      .sp-tickets-split { grid-template-columns: 1fr !important; }
+      .sp-ticket-cell + .sp-ticket-cell { border-left: none !important; border-top: 2px solid #fdeaf5; }
+    }
+
+    /* Cell anatomy */
+    .sp-ticket-cell {
+      display: flex; flex-direction: column; align-items: center;
+      text-align: center; padding: 40px 32px;
+    }
+    .sp-ticket-cell.sp-cell-divider { border-left: 2px solid #fdeaf5; }
+    .sp-ticket-cell.sp-legacy-cell  { padding-left: 20px; padding-right: 20px; }
+
+    .sp-cell-title {
+      font-size: 26px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.02em; color: #383838; line-height: 1; margin: 0;
+    }
+    .sp-accent-bar {
+      width: 40px; height: 4px; background: #e50695;
+      border-radius: 9999px; margin: 10px 0 28px; flex-shrink: 0;
+    }
+    .sp-price-slot {
+      height: 100px; display: flex; align-items: center;
+      justify-content: center; margin-bottom: 8px;
+    }
+    .sp-price {
+      font-size: 72px; font-weight: 900; color: #e50695;
+      line-height: 1; white-space: nowrap;
+    }
+    .sp-price.sp-price-lg { font-size: 60px; }
+    .sp-cents { font-size: 0.42em; vertical-align: super; letter-spacing: 0; line-height: 1; }
+    .sp-descriptor {
+      font-size: 20px; font-weight: 800; text-transform: uppercase;
+      color: #383838; margin-bottom: 6px;
+    }
+    .sp-descriptor.sp-has-list { margin-bottom: 12px; }
+    .sp-subtext { font-size: 14px; font-weight: 600; color: #6b7280; flex-grow: 1; }
+    .sp-tier-lead {
+      font-size: 12px; font-weight: 700; text-transform: uppercase;
+      letter-spacing: 0.1em; color: #e50695; margin-bottom: 8px;
+    }
+    .sp-tier-list {
+      list-style: none; padding: 0; margin: 0; flex-grow: 1;
+      font-size: 14px; font-weight: 600; color: #4b5563;
+      line-height: 1.7; text-align: center;
+    }
+
+    /* CTA pills */
+    .sp-cta {
+      display: block; width: 100%; max-width: 240px;
+      margin-top: 24px; padding: 14px 16px;
+      border-radius: 50px; border: 3px solid #e50695;
+      font-family: var(--font-m); font-size: 16px; line-height: 1.5;
+      font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
+      text-align: center; text-decoration: none; cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .sp-cta-outline { background: transparent; color: #e50695; }
+    .sp-cta-outline:hover { background: #e50695; color: #fff; }
+    .sp-cta-solid { background: #e50695; color: #fff; }
+    .sp-cta-solid:hover { background: #fff; color: #e50695; transform: scale(1.04); }
+    .sp-cta-member { background: #e0e621; border-color: #e0e621; color: #383838; position: relative; }
+    .sp-cta-member:hover { background: #fff; border-color: #fff; color: #e50695; transform: scale(1.04); }
+    .sp-cta-wide {
+      display: inline-block; width: auto; max-width: none; margin-top: 0;
+      padding: 14px 48px; letter-spacing: 0.1em;
+      background: #e50695; color: #fff;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+    }
+    .sp-cta-wide:hover { background: #e0e621; border-color: #e0e621; color: #383838; transform: scale(1.04); }
+
+    /* Member panel interior */
+    .sp-member-inner {
+      position: relative; display: flex; flex-direction: column;
+      align-items: center; text-align: center; padding: 40px 32px; height: 100%;
+    }
+    .sp-halftone {
+      position: absolute; inset: 0; pointer-events: none;
+      background-image: radial-gradient(rgba(255,255,255,0.18) 1.5px, transparent 1.5px);
+      background-size: 14px 14px;
+      -webkit-mask-image: linear-gradient(115deg, black 0%, transparent 45%);
+      mask-image: linear-gradient(115deg, black 0%, transparent 45%);
+    }
+    .sp-member-title {
+      position: relative; font-size: 26px; font-weight: 900; text-transform: uppercase;
+      letter-spacing: -0.02em; color: #e0e621; line-height: 1; margin: 0;
+    }
+    .sp-member-bar {
+      position: relative; width: 40px; height: 4px; background: #e0e621;
+      border-radius: 9999px; margin: 10px 0 28px; flex-shrink: 0;
+    }
+    .sp-member-price-slot {
+      position: relative; height: 100px; display: flex;
+      align-items: center; justify-content: center; gap: 16px; margin-bottom: 8px;
+    }
+    .sp-member-price {
+      font-size: 72px; font-weight: 900; color: #e0e621; line-height: 1; white-space: nowrap;
+    }
+    .sp-member-mo { font-size: 24px; font-weight: 800; }
+    .sp-member-descriptor {
+      position: relative; font-size: 20px; font-weight: 800;
+      text-transform: uppercase; color: #fff; margin-bottom: 6px;
+    }
+    .sp-member-subtext {
+      position: relative; font-size: 14px; font-weight: 600;
+      color: rgba(255,255,255,0.85); flex-grow: 1;
+    }
+
+    /* HALF badge */
+    .sp-half-badge {
+      position: relative; width: 100px; height: 100px; color: white;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; flex-shrink: 0;
+    }
+    .sp-half-badge svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .sp-half-text { font-size: 16px; font-weight: 900; line-height: 1; position: relative; }
+    .sp-half-sub  { font-size: 9px; font-weight: 700; line-height: 1.4; padding: 0 12px; position: relative; }
+
+    /* Add-on grid */
+    .sp-addon-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .sp-addon-wide { grid-column: span 2; }
+    .sp-addon-grid.sp-stacked { grid-template-columns: 1fr; }
+    .sp-addon-grid.sp-stacked .sp-addon-wide { grid-column: span 1; }
+    @media (max-width: 480px) {
+      .sp-addon-grid { grid-template-columns: 1fr !important; }
+      .sp-addon-wide { grid-column: span 1 !important; }
+    }
+
+    .sp-addon-card {
+      height: 112px; border-radius: 25px;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      padding: 0 24px; display: flex; align-items: center; gap: 16px;
+    }
+    .sp-addon-ticket { background: #fff; border-bottom: 4px solid #e50695; }
+    .sp-addon-member { background: #e50695; }
+    .sp-addon-info   { flex-grow: 1; min-width: 0; }
+    .sp-addon-name-t { font-size: 16px; font-weight: 800; text-transform: uppercase; color: #383838; line-height: 1.2; }
+    .sp-addon-name-m { font-size: 16px; font-weight: 800; text-transform: uppercase; color: #fff; line-height: 1.2; }
+    .sp-addon-desc-t { font-size: 12px; font-weight: 600; color: #6b7280; }
+    .sp-addon-desc-m { font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.85); }
+    .sp-addon-price-t { font-size: 30px; font-weight: 900; color: #e50695; white-space: nowrap; flex-shrink: 0; }
+    .sp-addon-price-m { font-size: 30px; font-weight: 900; color: #e0e621; white-space: nowrap; flex-shrink: 0; }
+
+    /* Fine print */
+    .sp-fine-print {
+      font-size: 11px; line-height: 1.6; color: #9ca3af;
+      text-align: center; max-width: 896px; margin: 40px auto 0;
+    }
+
+    /* Attractions gallery */
+    .sp-gallery-header { text-align: center; margin-bottom: 40px; }
+    .sp-gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 24px;
+      grid-auto-rows: 16rem;
+    }
+    @media (min-width: 768px) { .sp-gallery-grid { grid-template-columns: repeat(4, 1fr); } }
+    .sp-gallery-grid > * { height: 100%; }
+
+    .sp-attraction-card {
+      position: relative; overflow: hidden;
+      border-radius: 25px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    }
+    .sp-featured-card { grid-column: span 2; grid-row: span 2; }
+    .sp-attraction-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .sp-img-placeholder { width: 100%; height: 100%; background: #e5e7eb; }
+
+    .sp-attr-overlay {
+      position: absolute; inset: 0;
+      background: rgba(56,56,56,0.78);
+      opacity: 0; transition: opacity 0.3s ease;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px; text-align: center; color: #fff;
+    }
+    .sp-attraction-card:hover .sp-attr-overlay { opacity: 1; }
+    .sp-attr-overlay p { font-size: 14px; font-weight: 600; margin-bottom: 20px; max-width: 320px; }
+    .sp-featured-card .sp-attr-overlay p { font-size: 18px; }
+    .sp-attr-overlay a {
+      color: #e0e621; font-size: 12px; font-weight: 700;
+      text-transform: uppercase; text-decoration: none;
+    }
+    .sp-attr-overlay a:hover { text-decoration: underline; }
+    .sp-featured-card .sp-attr-overlay a { font-size: 14px; }
+
+    .sp-featured-pill {
+      position: absolute; top: 20px; left: 20px; z-index: 10;
+      background: #e50695; color: #fff; font-size: 12px; font-weight: 900;
+      text-transform: uppercase; padding: 6px 16px; border-radius: 50px;
+      letter-spacing: 0.07em; box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    }
+    .sp-attr-name-pill {
+      position: absolute; bottom: 16px; left: 16px; z-index: 10;
+      background: #e0e621; color: #383838; font-size: 12px; font-weight: 900;
+      text-transform: uppercase; padding: 4px 12px; border-radius: 50px;
+    }
+    .sp-featured-card .sp-attr-name-pill {
+      bottom: 20px; left: 20px; font-size: 16px; padding: 8px 20px;
+    }
+    .sp-gallery-footer { margin-top: 48px; text-align: center; }
   </style>
 </head>
 <body>
@@ -369,7 +625,7 @@
     </div>
   </div>
   <nav id="tabBar" class="tab-bar">
-    <button class="tab-btn active" data-tab="tickets" data-color="#1D4ED8" style="border-bottom-color:#1D4ED8">
+    <button class="tab-btn active" data-tab="tickets" data-color="#e50695" style="border-bottom-color:#e50695">
       Tickets &amp; Bundles
     </button>
     <button class="tab-btn" data-tab="birthdays" data-color="#C2410C">
@@ -406,58 +662,75 @@
       <div id="stepTickets" class="load-step">&nbsp;</div>
     </div>
 
-    <section id="ticketSec" class="sec">
-      <div class="sec-head" style="background:var(--c-ticket)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
-        </svg>
-        <span class="sec-title">Day Passes &amp; Tickets</span>
-      </div>
-      <div class="sec-body">
-        <div id="ticketGrid" class="grid3"></div>
-        <div id="ticketSecondary" class="ticket-secondary hidden"></div>
-      </div>
-    </section>
+    <!-- Simplified pricing layout -->
+    <div id="spWrap" class="sp-wrap hidden">
 
-    <section id="bundleSec" class="sec">
-      <div class="sec-head" style="background:var(--c-bundle)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/>
-        </svg>
-        <span class="sec-title">Deals &amp; Bundles</span>
-      </div>
-      <div class="sec-body">
-        <div id="bundleGrid" class="grid3"></div>
-      </div>
-    </section>
+      <!-- Pricing zone -->
+      <section class="sp-pricing-zone">
+        <div class="sp-container">
+          <div>
+            <p class="sp-eyebrow">Choose Your Adventure</p>
+            <h1 class="sp-h1" id="spH1">Unlimited Play</h1>
+            <p class="sp-subline" id="spSubline">Unlimited Fun &middot; No Time Limits &middot; Adventure Unlimited!</p>
+          </div>
 
-    <section id="merchSec" class="sec">
-      <div class="sec-head" style="background:var(--c-merch)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
-        </svg>
-        <span class="sec-title">Add-ons &amp; Merchandise</span>
-      </div>
-      <div class="sec-body">
-        <div id="merchGrid" class="grid3"></div>
-      </div>
-    </section>
+          <div class="sp-panels" id="spPanels">
+            <!-- Tickets column -->
+            <div class="sp-col">
+              <div class="sp-panel-card" id="spTicketsPanel">
+                <div class="sp-tickets-split" id="spTicketsSplit"><!-- filled by JS --></div>
+              </div>
+              <div class="sp-addon-grid" id="spTicketAddons"><!-- filled by JS --></div>
+            </div>
 
-    <section id="attractionSecT" class="sec">
-      <div class="sec-head" style="background:var(--c-attract)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-        </svg>
-        <span class="sec-title">Park Attractions</span>
-      </div>
-      <div class="sec-body">
-        <div id="attractionListT" class="attr-grid"></div>
-      </div>
-    </section>
+            <!-- Membership column -->
+            <div class="sp-col">
+              <div class="sp-panel-card sp-member-panel">
+                <div class="sp-member-inner">
+                  <div class="sp-halftone"></div>
+                  <h3 class="sp-member-title">Monthly Membership</h3>
+                  <span class="sp-member-bar"></span>
+                  <div class="sp-member-price-slot">
+                    <span class="sp-member-price" id="spMemberPrice">--</span>
+                    <div class="sp-half-badge" id="spHalfBadge">
+                      <svg viewBox="0 0 100 100" fill="none" aria-hidden="true">
+                        <path d="M 50 8 A 42 42 0 0 1 50 92" stroke="#e0e621" stroke-width="3"></path>
+                        <path d="M 50 92 A 42 42 0 0 1 50 8" stroke="#e0e621" stroke-width="3"></path>
+                        <polygon points="53,86 53,98 41,92" fill="#e0e621"></polygon>
+                        <polygon points="47,2 47,14 59,8" fill="#e0e621"></polygon>
+                      </svg>
+                      <span class="sp-half-text">HALF</span>
+                      <span class="sp-half-sub" id="spHalfSub">the cost of<br>Unlimited&nbsp;Play&nbsp;+</span>
+                    </div>
+                  </div>
+                  <p class="sp-member-descriptor" id="spMemberDescriptor">Unlimited Visits, Go-Karts Included!</p>
+                  <p class="sp-member-subtext">Plus member pricing on everything below.</p>
+                  <a id="spMemberCta" href="#" target="_blank" rel="noopener" class="sp-cta sp-cta-member">Join Now</a>
+                </div>
+              </div>
+              <div class="sp-addon-grid" id="spMemberAddons"><!-- filled by JS --></div>
+            </div>
+          </div>
+
+          <p class="sp-fine-print">Prices shown are live values from the location pricing feed. Shorty 40 access level is dependent upon the child&rsquo;s attraction eligibility. Parent Ticket: with purchase of a full-price child&rsquo;s pass; must match the child&rsquo;s attraction level. Urban Air Socks are required. Membership includes one pair of Urban Air Socks on the initial visit only. Prices do not include tax. Offers and pricing not valid for parties, groups, or special events.</p>
+        </div>
+      </section>
+
+      <!-- Attractions gallery -->
+      <section class="sp-gallery-section">
+        <div class="sp-container">
+          <div class="sp-gallery-header">
+            <p class="sp-eyebrow">Experience the Thrill</p>
+            <h2 class="sp-h2">Attractions Gallery</h2>
+          </div>
+          <div class="sp-gallery-grid" id="spGalleryGrid"><!-- filled by JS --></div>
+          <div class="sp-gallery-footer">
+            <a href="https://www.urbanair.com/attractions/" target="_blank" rel="noopener" class="sp-cta sp-cta-wide">View All Attractions</a>
+          </div>
+        </div>
+      </section>
+
+    </div><!-- /spWrap -->
 
   </div><!-- /tab tickets -->
 
@@ -470,32 +743,34 @@
       <div id="stepBirthdays" class="load-step">&nbsp;</div>
     </div>
 
-    <section id="bdaySec" class="sec">
-      <div class="sec-head" style="background:var(--c-birthday)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2L4 20h16L12 2z"/>
-          <path stroke-linecap="round" stroke-width="2" d="M4 20h16"/>
-          <path stroke-linecap="round" stroke-width="1.5" d="M8.5 13.5h7M9.5 17h5"/>
-          <circle cx="12" cy="2" r="1.5" fill="currentColor" stroke="none"/>
-        </svg>
-        <span class="sec-title">Birthday Parties</span>
-      </div>
-      <div class="sec-body">
-        <div id="bdayGrid" class="grid3"></div>
-        <div id="attrMatrixSub" class="hidden">
-          <div class="hangouts-label">Attractions by Party Tier</div>
-          <div id="attrMatrix" style="overflow-x:auto"></div>
+    <div class="bday-sections">
+      <section id="bdaySec" class="sec">
+        <div class="sec-head" style="background:var(--c-birthday)">
+          <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 2L4 20h16L12 2z"/>
+            <path stroke-linecap="round" stroke-width="2" d="M4 20h16"/>
+            <path stroke-linecap="round" stroke-width="1.5" d="M8.5 13.5h7M9.5 17h5"/>
+            <circle cx="12" cy="2" r="1.5" fill="currentColor" stroke="none"/>
+          </svg>
+          <span class="sec-title">Birthday Parties</span>
         </div>
-        <div id="commonAmenitiesSub" class="hidden">
-          <div class="hangouts-label">Included With Every Hangout</div>
-          <div id="commonAmenitiesList" class="common-grid"></div>
+        <div class="sec-body">
+          <div id="bdayGrid" class="grid3"></div>
+          <div id="attrMatrixSub" class="hidden">
+            <div class="hangouts-label">Attractions by Party Tier</div>
+            <div id="attrMatrix" style="overflow-x:auto"></div>
+          </div>
+          <div id="commonAmenitiesSub" class="hidden">
+            <div class="hangouts-label">Included With Every Hangout</div>
+            <div id="commonAmenitiesList" class="common-grid"></div>
+          </div>
+          <div id="hangoutsSub" class="hidden">
+            <div class="hangouts-label">Hangouts</div>
+            <div id="hangoutsGrid" class="hangouts-row"></div>
+          </div>
         </div>
-        <div id="hangoutsSub" class="hidden">
-          <div class="hangouts-label">Hangouts</div>
-          <div id="hangoutsGrid" class="hangouts-row"></div>
-        </div>
-      </div>
-    </section>
+      </section>
+    </div>
 
   </div><!-- /tab birthdays -->
 
@@ -508,44 +783,46 @@
       <div id="stepMemberships" class="load-step">&nbsp;</div>
     </div>
 
-    <section id="memberSec" class="sec">
-      <div class="sec-head" style="background:var(--c-member)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-        <span class="sec-title">Monthly Memberships</span>
-      </div>
-      <div class="sec-body">
-        <div id="memberGrid" class="grid3"></div>
-      </div>
-    </section>
+    <div class="member-sections">
+      <section id="memberSec" class="sec">
+        <div class="sec-head" style="background:var(--c-member)">
+          <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+          <span class="sec-title">Monthly Memberships</span>
+        </div>
+        <div class="sec-body">
+          <div id="memberGrid" class="grid3"></div>
+        </div>
+      </section>
 
-    <section id="annualSec" class="sec">
-      <div class="sec-head" style="background:var(--c-annual)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-        </svg>
-        <span class="sec-title">Annual &amp; Prepaid Passes</span>
-      </div>
-      <div class="sec-body">
-        <div id="annualGrid" class="grid3"></div>
-      </div>
-    </section>
+      <section id="annualSec" class="sec">
+        <div class="sec-head" style="background:var(--c-annual)">
+          <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+          </svg>
+          <span class="sec-title">Annual &amp; Prepaid Passes</span>
+        </div>
+        <div class="sec-body">
+          <div id="annualGrid" class="grid3"></div>
+        </div>
+      </section>
 
-    <section id="attractionSecM" class="sec">
-      <div class="sec-head" style="background:var(--c-attract)">
-        <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
-        </svg>
-        <span class="sec-title">Park Attractions</span>
-      </div>
-      <div class="sec-body">
-        <div id="attractionListM" class="attr-grid"></div>
-      </div>
-    </section>
+      <section id="attractionSecM" class="sec">
+        <div class="sec-head" style="background:var(--c-attract)">
+          <svg class="sec-head-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>
+          </svg>
+          <span class="sec-title">Park Attractions</span>
+        </div>
+        <div class="sec-body">
+          <div id="attractionListM" class="attr-grid"></div>
+        </div>
+      </section>
+    </div>
 
   </div><!-- /tab memberships -->
 
@@ -556,22 +833,48 @@
 const API      = 'https://unleashedapi.urbanairparks.com';
 const BRAND_ID = 1;
 
-/* Per-park, per-tab cache: CACHE[parkId][tab] = data | null */
 const CACHE = {};
 
-let currentParkId   = null;
-let currentParkName = '';
-let activeTab       = 'tickets';
+let currentParkId       = null;
+let currentParkName     = '';
+let currentUrlSlug      = '';
+let currentLocationSlug = '';
+let activeTab           = 'tickets';
 
-const C = {
-  ticket:   '#1D4ED8',
-  bundle:   '#7C3AED',
-  member:   '#B45309',
-  annual:   '#047857',
-  birthday: '#C2410C',
-  merch:    '#374151',
-  attract:  '#0D9488',
+/* ─── State abbreviation → URL slug map ─── */
+const STATE_NAMES = {
+  AL:'alabama', AK:'alaska', AZ:'arizona', AR:'arkansas', CA:'california',
+  CO:'colorado', CT:'connecticut', DE:'delaware', FL:'florida', GA:'georgia',
+  HI:'hawaii', ID:'idaho', IL:'illinois', IN:'indiana', IA:'iowa',
+  KS:'kansas', KY:'kentucky', LA:'louisiana', ME:'maine', MD:'maryland',
+  MA:'massachusetts', MI:'michigan', MN:'minnesota', MS:'mississippi', MO:'missouri',
+  MT:'montana', NE:'nebraska', NV:'nevada', NH:'new-hampshire', NJ:'new-jersey',
+  NM:'new-mexico', NY:'new-york', NC:'north-carolina', ND:'north-dakota', OH:'ohio',
+  OK:'oklahoma', OR:'oregon', PA:'pennsylvania', RI:'rhode-island', SC:'south-carolina',
+  SD:'south-dakota', TN:'tennessee', TX:'texas', UT:'utah', VT:'vermont',
+  VA:'virginia', WA:'washington', WV:'west-virginia', WI:'wisconsin', WY:'wyoming',
+  DC:'washington-dc',
 };
+
+function buildLocationSlug(parkName) {
+  const [city = '', stateAbbr = ''] = parkName.split(',').map(s => s.trim());
+  const stateName = STATE_NAMES[stateAbbr.toUpperCase()] || stateAbbr.toLowerCase().replace(/\s+/g, '-');
+  const citySlug  = city.toLowerCase().replace(/\s+/g, '-');
+  return stateName && citySlug ? `${stateName}-${citySlug}` : '';
+}
+
+/* ─── WP Attractions cache ─── */
+let _wpAttrProm = null;
+
+async function loadWpAttractions() {
+  if (!_wpAttrProm) {
+    _wpAttrProm = fetch('https://www.urbanair.com/wp-json/urban_air/attractions/')
+      .then(r => r.ok ? r.json() : [])
+      .then(d => Array.isArray(d) ? d : (d.data || []))
+      .catch(() => []);
+  }
+  return _wpAttrProm;
+}
 
 /* ─── DOM helpers ─── */
 const $       = id => document.getElementById(id);
@@ -580,6 +883,14 @@ const hideEl  = id => { const e=$(id); if(e){e.classList.add('hidden'); e.classL
 const showSec = id => { const e=$(id); if(e) e.classList.add('on'); };
 const hideSec = id => { const e=$(id); if(e) e.classList.remove('on'); };
 const usd     = n  => new Intl.NumberFormat('en-US',{style:'currency',currency:'USD'}).format(n);
+
+/* ─── Price formatter (dollars + superscript cents) ─── */
+function fmtPrice(price) {
+  const dollars = Math.floor(price);
+  const cents   = Math.round((price - dollars) * 100);
+  if (cents === 0) return `$${dollars}`;
+  return `$${dollars}<span class="sp-cents">${String(cents).padStart(2,'0')}</span>`;
+}
 
 /* ─── City name cleaner ─── */
 function makeCleaner(parkName) {
@@ -590,7 +901,7 @@ function makeCleaner(parkName) {
   return name => (name || '').replace(rPre, '').replace(rSuf, '').trim();
 }
 
-/* ─── Height requirement annotations ─── */
+/* ─── Height requirement annotations (used by Memberships tab) ─── */
 function attractionHTML(attractions) {
   if (!attractions?.length) return '';
   const fnMap = {}, fns = [];
@@ -608,40 +919,9 @@ function attractionHTML(attractions) {
   return `<div class="attracts-head">Included Attractions</div><ul class="attracts-list">${rows}</ul>${notes}`;
 }
 
-/* ─── Card builders ─── */
-const isSecondaryTicket = name => /\b(parent|shorty)\b/i.test(name);
-
-function ticketCard(p, color) {
-  return `
-<div class="card">
-  <div class="card-bar" style="background:${color}"></div>
-  <div class="card-body">
-    <div class="card-row">
-      <div class="card-name">${p.parkProductName}</div>
-      <div class="card-price-wrap">
-        <div class="card-price" style="color:${color}">${usd(p.price)}</div>
-      </div>
-    </div>
-    ${p.description ? `<div class="card-desc">${p.description}</div>` : ''}
-    ${attractionHTML(p.attractions)}
-  </div>
-</div>`;
-}
-
-function secondaryTicketCard(p, color) {
-  return `
-<div class="ticket-secondary-card">
-  <div class="ticket-secondary-left">
-    <div class="ticket-secondary-name">${p.parkProductName}</div>
-    ${p.description ? `<div class="ticket-secondary-desc">${p.description}</div>` : ''}
-    ${attractionHTML(p.attractions)}
-  </div>
-  <div class="card-price" style="color:${color};font-size:20px">${usd(p.price)}</div>
-</div>`;
-}
-
+/* ─── Card builders (Memberships + Birthdays tabs) ─── */
 function memberCard(p) {
-  const c  = p.color || C.member;
+  const c  = p.color || '#B45309';
   const iv = p.billingInterval || 'mo';
   return `
 <div class="card">
@@ -665,13 +945,13 @@ function memberCard(p) {
 function annualCard(p) {
   return `
 <div class="card">
-  <div class="card-bar" style="background:${C.annual}"></div>
+  <div class="card-bar" style="background:var(--c-annual)"></div>
   <div class="card-body">
     <div class="card-row">
       <div class="card-name">${p.parkProductName}</div>
-      <div class="card-price" style="color:${C.annual}">${usd(p.price)}</div>
+      <div class="card-price" style="color:var(--c-annual)">${usd(p.price)}</div>
     </div>
-    ${p.productLevelName ? `<div class="card-badge" style="background:${C.annual}18;color:${C.annual}">${p.productLevelName}</div>` : ''}
+    ${p.productLevelName ? `<div class="card-badge" style="background:#04785718;color:var(--c-annual)">${p.productLevelName}</div>` : ''}
     ${p.description ? `<div class="card-desc">${p.description}</div>` : ''}
     ${attractionHTML(p.attractions)}
   </div>
@@ -679,7 +959,7 @@ function annualCard(p) {
 }
 
 function bdayCard(pkg) {
-  const c = pkg.productLevelColor || C.birthday;
+  const c = pkg.productLevelColor || '#C2410C';
   return `
 <div class="bday-card">
   <div class="bday-head" style="background:${c}">
@@ -703,7 +983,7 @@ function bdayCard(pkg) {
 
 function hangoutCard(h) {
   const free = h.price === 0;
-  const c    = free ? C.annual : C.birthday;
+  const c    = free ? '#047857' : '#C2410C';
   const priceHTML = free
     ? `<span style="color:#16a34a;font-family:var(--font-h);font-size:18px;font-weight:700">Included</span>`
     : `<span class="hgout-price" style="color:${c}">+${usd(h.price)}</span>`;
@@ -718,15 +998,7 @@ function hangoutCard(h) {
 </div>`;
 }
 
-function simpleCard(p, color) {
-  return `
-<div class="row-card">
-  <div class="row-card-name">${p.parkProductName}</div>
-  <div class="row-card-price" style="color:${color}">${usd(p.price)}</div>
-</div>`;
-}
-
-/* ─── API ─── */
+/* ─── API helper ─── */
 async function apiFetch(url, signal) {
   const res = await fetch(url, signal ? { signal } : {});
   if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -734,7 +1006,6 @@ async function apiFetch(url, signal) {
 }
 
 /* ─── Attractions helpers ─── */
-
 function extractAttractions(products) {
   const seen = new Set(), out = [];
   [...products]
@@ -758,7 +1029,7 @@ async function loadAttractions(parkId) {
   return CACHE[parkId]._attrProm;
 }
 
-/* ─── Calendar race: resolves on FIRST date with slots ─── */
+/* ─── Calendar race: first date with available slots ─── */
 async function findLimitId(parkId, stepEl) {
   if (stepEl) stepEl.textContent = 'Scanning upcoming schedule…';
   const makeDate = i => {
@@ -790,33 +1061,61 @@ async function findLimitId(parkId, stepEl) {
   }
 }
 
-/* ─── Per-tab data loaders ─── */
+/* ─── Pricing model helpers ─── */
+const isSecondaryTicket = name => /\b(parent|shorty)\b/i.test(name);
+const isGoKartsTicket   = t => /go.?kart|unlimited play\s*\+/i.test(t.parkProductName)
+  || (t.attractions || []).some(a => /go.?kart/i.test(a.name));
+
+function detectPricingModel(primaryTickets) {
+  if (primaryTickets.length >= 3) return 'legacy';
+  if (primaryTickets.some(t => /\b(deluxe|ultimate|platinum)\b/i.test(t.parkProductName))) return 'legacy';
+  return 'simplified';
+}
+
+/* ─── Data loaders ─── */
 
 async function loadTickets(parkId) {
   if (CACHE[parkId]?.tickets) return CACHE[parkId].tickets;
-  const step = $('stepTickets');
+  const step  = $('stepTickets');
   const clean = makeCleaner(currentParkName);
   const cleanAll = arr => arr.map(p => ({ ...p, parkProductName: clean(p.parkProductName) }));
 
   const { limitId, date } = await findLimitId(parkId, step);
   if (step) step.textContent = limitId ? 'Loading tickets…' : 'No upcoming schedule found';
 
-  const [all, merch, attractions] = await Promise.all([
+  const [allTickets, merch, memberships, wpAttractions] = await Promise.all([
     limitId
       ? apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=2&date=${date}&parkAttendanceLimitId=${limitId}`)
       : [],
     apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=3`),
-    loadAttractions(parkId),
+    apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=1`),
+    loadWpAttractions(),
   ]);
 
-  const stripTicket = arr => arr.map(p => ({ ...p, parkProductName: p.parkProductName.replace(/\s+ticket$/i, '').trim() }));
-  const data = {
-    tickets: stripTicket(cleanAll(all.filter(p => p.productTypeId === 2))),
-    bundles: cleanAll(all.filter(p => p.productTypeId === 11)),
-    merch:   cleanAll(merch),
-    attractions,
-  };
+  const stripSuffixes = arr => arr.map(p => ({
+    ...p,
+    parkProductName: p.parkProductName
+      .replace(/\s+ticket$/i, '')
+      .replace(/\s+membership$/i, '')
+      .replace(/\s+pass$/i, '')
+      .trim(),
+  }));
+
   if (!CACHE[parkId]) CACHE[parkId] = {};
+
+  /* Share attractions with the memberships tab cache */
+  if (!('attractions' in CACHE[parkId])) {
+    CACHE[parkId].attractions = extractAttractions(memberships);
+  }
+
+  const data = {
+    tickets:      stripSuffixes(cleanAll(allTickets)),
+    merch:        cleanAll(merch),
+    memberships:  stripSuffixes(cleanAll(memberships)),
+    attractions:  CACHE[parkId].attractions,
+    wpAttractions,
+  };
+
   CACHE[parkId].tickets = data;
   return data;
 }
@@ -841,8 +1140,8 @@ async function loadBirthdays(parkId) {
 }
 
 async function loadMemberships(parkId) {
-  if (CACHE[parkId]?.memberships) return CACHE[parkId].memberships;
-  const step = $('stepMemberships');
+  if (CACHE[parkId]?.memberships_tab) return CACHE[parkId].memberships_tab;
+  const step  = $('stepMemberships');
   if (step) step.textContent = 'Loading memberships…';
   const clean = makeCleaner(currentParkName);
   const cleanAll = arr => arr.map(p => ({ ...p, parkProductName: clean(p.parkProductName) }));
@@ -851,16 +1150,19 @@ async function loadMemberships(parkId) {
     apiFetch(`${API}/brands/${BRAND_ID}/parks/${parkId}/products?productTypeIds=7`),
   ]);
   if (!CACHE[parkId]) CACHE[parkId] = {};
-  /* Populate shared attractions cache as a side-effect (avoids a second fetch when tickets tab loads) */
   if (!('attractions' in CACHE[parkId])) CACHE[parkId].attractions = extractAttractions(m);
   const attractions = CACHE[parkId].attractions;
-  const stripMembership = arr => arr.map(p => ({ ...p, parkProductName: p.parkProductName.replace(/\s+membership$/i, '').trim() }));
-  const data = { memberships: stripMembership(cleanAll(m)), annualPasses: stripMembership(cleanAll(a)), attractions };
-  CACHE[parkId].memberships = data;
+  const strip = arr => arr.map(p => ({
+    ...p,
+    parkProductName: p.parkProductName
+      .replace(/\s+membership$/i, '').replace(/\s+pass$/i, '').trim(),
+  }));
+  const data = { memberships: strip(cleanAll(m)), annualPasses: strip(cleanAll(a)), attractions };
+  CACHE[parkId].memberships_tab = data;
   return data;
 }
 
-/* ─── Renderers ─── */
+/* ─── Renderers (Memberships + Birthdays) ─── */
 
 function renderAttractions(listId, secId, attractions) {
   if (!attractions?.length) { hideSec(secId); return; }
@@ -873,22 +1175,16 @@ function renderAttractions(listId, secId, attractions) {
 }
 
 function renderAttractionMatrix(packages) {
-  const sub = $('attrMatrixSub');
   if (!packages?.length) { hideEl('attrMatrixSub'); return; }
-
   const tiers = [...packages].sort((a, b) => a.productLevelId - b.productLevelId);
-
-  /* Collect all unique attractions in tier order */
   const seen = new Set(), allAttractions = [];
   tiers.forEach(pkg => (pkg.attractions || []).forEach(a => {
     if (!seen.has(a.name)) { seen.add(a.name); allAttractions.push(a); }
   }));
   if (!allAttractions.length) { hideEl('attrMatrixSub'); return; }
-
   const tierHeaders = tiers.map(t =>
-    `<th style="background:${t.productLevelColor || C.birthday}">${t.productLevelName}</th>`
+    `<th style="background:${t.productLevelColor || '#C2410C'}">${t.productLevelName}</th>`
   ).join('');
-
   const rows = allAttractions.map(a => {
     const minLevel = a.minimumProductLevelId || 1;
     const hrNote = a.heightRequirement ? ` <span style="font-size:10px;font-weight:400;color:var(--g400)">(${a.heightRequirement}")</span>` : '';
@@ -899,7 +1195,6 @@ function renderAttractionMatrix(packages) {
     ).join('');
     return `<tr><td class="attr-col">${a.name}${hrNote}</td>${cells}</tr>`;
   }).join('');
-
   $('attrMatrix').innerHTML = `
 <table class="tier-matrix">
   <thead><tr><th class="attr-col">Attraction</th>${tierHeaders}</tr></thead>
@@ -914,9 +1209,7 @@ function renderCommonAmenities(hangouts) {
   if (!amenityLists.length) { hideEl('commonAmenitiesSub'); return; }
   const common = amenityLists.reduce((acc, list) => acc.filter(a => list.includes(a)));
   if (!common.length) { hideEl('commonAmenitiesSub'); return; }
-  $('commonAmenitiesList').innerHTML = common
-    .map(a => `<div class="common-item">${a}</div>`)
-    .join('');
+  $('commonAmenitiesList').innerHTML = common.map(a => `<div class="common-item">${a}</div>`).join('');
   showEl('commonAmenitiesSub');
 }
 
@@ -924,27 +1217,6 @@ function renderGrid(secId, gridId, items, cardFn) {
   if (!items?.length) { hideSec(secId); return; }
   $(gridId).innerHTML = items.map(cardFn).join('');
   showSec(secId);
-}
-
-function renderTickets({ tickets, bundles, merch, attractions }, parkId) {
-  const primary   = tickets.filter(p => !isSecondaryTicket(p.parkProductName));
-  const secondary = tickets.filter(p =>  isSecondaryTicket(p.parkProductName));
-  if (primary.length || secondary.length) {
-    $('ticketGrid').innerHTML = primary.map(p => ticketCard(p, C.ticket)).join('');
-    const secRow = $('ticketSecondary');
-    if (secondary.length) {
-      secRow.innerHTML = secondary.map(p => secondaryTicketCard(p, C.ticket)).join('');
-      secRow.classList.remove('hidden');
-    } else {
-      secRow.classList.add('hidden');
-    }
-    showSec('ticketSec');
-  } else {
-    hideSec('ticketSec');
-  }
-  renderGrid('bundleSec', 'bundleGrid', bundles, p => ticketCard(p, C.bundle));
-  renderGrid('merchSec',  'merchGrid',  merch,   p => simpleCard(p, C.merch));
-  renderAttractions('attractionListT', 'attractionSecT', attractions);
 }
 
 function renderBirthdays({ packages, hangouts }) {
@@ -970,45 +1242,296 @@ function renderMemberships({ memberships, annualPasses, attractions }) {
   renderAttractions('attractionListM', 'attractionSecM', attractions);
 }
 
+/* ─── Simplified pricing renderers ─── */
+
+function buildTicketCell(ticket, ticketUrl, ctaStyle, hasDivider, isLegacy, lowerAttrNames) {
+  const divCls  = hasDivider ? ' sp-cell-divider' : '';
+  const legCls  = isLegacy  ? ' sp-legacy-cell'  : '';
+  const priceCls = isLegacy ? ' sp-price-lg'    : '';
+
+  let bodyHTML = '';
+  if (isLegacy) {
+    /* Incremental attraction list for this tier */
+    const tierAttrs = (ticket.attractions || []).filter(a => !lowerAttrNames.has(a.name));
+    const leadin = lowerAttrNames.size === 0
+      ? 'Includes:'
+      : lowerAttrNames.size <= 6
+        ? 'Everything in Deluxe, plus:'
+        : 'Everything in Ultimate and Deluxe, plus:';
+    bodyHTML = `
+      <p class="sp-descriptor sp-has-list">${ticket.description || 'Classic Thrills'}</p>
+      ${tierAttrs.length ? `
+        <p class="sp-tier-lead">${leadin}</p>
+        <ul class="sp-tier-list">${tierAttrs.map(a => `<li>${a.name}</li>`).join('')}</ul>
+      ` : ''}`;
+  } else {
+    const subtext = ctaStyle === 'solid'
+      ? 'All Day Play, plus unlimited laps.'
+      : 'Every attraction. All day long.';
+    bodyHTML = `
+      <p class="sp-descriptor">${ticket.description || 'All Day Play Ticket'}</p>
+      <p class="sp-subtext">${subtext}</p>`;
+  }
+
+  return `
+<div class="sp-ticket-cell${divCls}${legCls}">
+  <h3 class="sp-cell-title">${ticket.parkProductName}</h3>
+  <span class="sp-accent-bar"></span>
+  <div class="sp-price-slot">
+    <span class="sp-price${priceCls}">${fmtPrice(ticket.price)}</span>
+  </div>
+  ${bodyHTML}
+  <a href="${ticketUrl}" target="_blank" rel="noopener" class="sp-cta sp-cta-${ctaStyle}">Select Pass</a>
+</div>`;
+}
+
+function buildTicketAddons(secondary, merch, isStacked) {
+  const shorty = secondary.find(p => /shorty/i.test(p.parkProductName))
+              || merch.find(p => /shorty/i.test(p.parkProductName));
+  const parent = secondary.find(p => /parent/i.test(p.parkProductName))
+              || merch.find(p => /parent/i.test(p.parkProductName));
+  const socks  = merch.find(p => /sock/i.test(p.parkProductName));
+  const wide   = isStacked ? '' : ' sp-addon-wide';
+
+  let html = '';
+  if (shorty) html += `
+<div class="sp-addon-card sp-addon-ticket">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-t">Shorty 40&Prime;</h4><p class="sp-addon-desc-t">For children 40&Prime; &amp; under.</p></div>
+  <span class="sp-addon-price-t">${fmtPrice(shorty.price)}</span>
+</div>`;
+  if (parent) html += `
+<div class="sp-addon-card sp-addon-ticket">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-t">Parent Ticket</h4><p class="sp-addon-desc-t">With purchase of a child&rsquo;s pass.</p></div>
+  <span class="sp-addon-price-t">${fmtPrice(parent.price)}</span>
+</div>`;
+  if (socks) html += `
+<div class="sp-addon-card sp-addon-ticket${wide}">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-t">Urban Air Socks</h4><p class="sp-addon-desc-t">Urban Air Socks are required.</p></div>
+  <span class="sp-addon-price-t">${fmtPrice(socks.price)}</span>
+</div>`;
+  return html;
+}
+
+function buildMemberAddons(memberships, secondary, merch, isStacked) {
+  const mShorty = memberships.find(p => /shorty/i.test(p.parkProductName))
+               || secondary.find(p => /shorty/i.test(p.parkProductName));
+  const mParent = memberships.find(p => /parent/i.test(p.parkProductName))
+               || secondary.find(p => /parent/i.test(p.parkProductName));
+  const wide    = isStacked ? '' : ' sp-addon-wide';
+
+  let html = '';
+  if (mShorty) html += `
+<div class="sp-addon-card sp-addon-member">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-m">Shorty 40&Prime;</h4><p class="sp-addon-desc-m">For children 40&Prime; &amp; under.</p></div>
+  <span class="sp-addon-price-m">${fmtPrice(mShorty.price)}</span>
+</div>`;
+  if (mParent) html += `
+<div class="sp-addon-card sp-addon-member">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-m">Parent Membership</h4><p class="sp-addon-desc-m">With purchase of a child&rsquo;s pass.</p></div>
+  <span class="sp-addon-price-m">${fmtPrice(mParent.price)}</span>
+</div>`;
+  html += `
+<div class="sp-addon-card sp-addon-member${wide}">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-m">Urban Air Socks</h4><p class="sp-addon-desc-m">Included on the initial visit.</p></div>
+  <span class="sp-addon-price-m">FREE</span>
+</div>`;
+  return html;
+}
+
+function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, goKartsOn) {
+  const grid = $('spGalleryGrid');
+  if (!apiAttractions?.length) { grid.innerHTML = ''; return; }
+
+  /* Build WP lookup by normalised name */
+  const norm   = s => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const wpMap  = {};
+  (wpAttractions || []).forEach(wa => {
+    const title = wa.title?.rendered || wa.name || wa.title || '';
+    if (title) wpMap[norm(title)] = wa;
+  });
+
+  const wpImg  = wa => wa?.acf?.image?.url || wa?.featured_image_url || wa?.thumbnail || '';
+  const wpDesc = wa => (wa?.acf?.description || wa?.excerpt?.rendered || '').replace(/<[^>]+>/g, '').trim();
+  const wpSlug = wa => wa?.slug || '';
+
+  const goKartsAttr = apiAttractions.find(a => /go.?kart/i.test(a.name));
+  const others      = apiAttractions.filter(a => !/go.?kart/i.test(a.name));
+
+  let html = '';
+
+  /* Featured: Go-Karts tile */
+  if (goKartsOn && goKartsAttr) {
+    const wa   = wpMap[norm(goKartsAttr.name)];
+    const img  = wpImg(wa)  || 'https://www.urbanair.com/wp-content/uploads/2018/03/go-karts-1600x900-1-1080x675.jpg';
+    const desc = wpDesc(wa) || 'Put your driving skills to the test and race to the finish with our indoor Go-Karts.';
+    const slug = wpSlug(wa) || 'go-karts';
+    const href = locationSlug ? `https://www.urbanair.com/${locationSlug}/${slug}` : 'https://www.urbanair.com/attractions/';
+    html += `
+<div class="sp-attraction-card sp-featured-card">
+  <img src="${img}" alt="${goKartsAttr.name}" loading="lazy">
+  <div class="sp-featured-pill">Featured</div>
+  <div class="sp-attr-name-pill">${goKartsAttr.name}</div>
+  <div class="sp-attr-overlay">
+    <p>${desc}</p>
+    <a href="${href}" target="_blank" rel="noopener">Learn More</a>
+  </div>
+</div>`;
+  }
+
+  /* Regular tiles */
+  others.forEach(attr => {
+    const wa   = wpMap[norm(attr.name)];
+    const img  = wpImg(wa);
+    const desc = wpDesc(wa);
+    const slug = wpSlug(wa);
+    const href = (locationSlug && slug)
+      ? `https://www.urbanair.com/${locationSlug}/${slug}`
+      : 'https://www.urbanair.com/attractions/';
+    html += `
+<div class="sp-attraction-card">
+  ${img ? `<img src="${img}" alt="${attr.name}" loading="lazy">` : `<div class="sp-img-placeholder"></div>`}
+  <div class="sp-attr-name-pill">${attr.name}</div>
+  <div class="sp-attr-overlay">
+    ${desc ? `<p>${desc}</p>` : ''}
+    <a href="${href}" target="_blank" rel="noopener">Learn More</a>
+  </div>
+</div>`;
+  });
+
+  grid.innerHTML = html;
+}
+
+function renderTickets({ tickets, merch, memberships, attractions, wpAttractions }) {
+  const urlSlug      = currentUrlSlug;
+  const locationSlug = currentLocationSlug;
+
+  const ticketUrl = urlSlug
+    ? `https://store.unleashedbrands.com/urban-air/${urlSlug}/purchase/ticket`
+    : '#';
+  const memberUrl = urlSlug
+    ? `https://store.unleashedbrands.com/urban-air/${urlSlug}/purchase/membership`
+    : '#';
+
+  const secondary    = tickets.filter(p =>  isSecondaryTicket(p.parkProductName));
+  const primary      = tickets.filter(p => !isSecondaryTicket(p.parkProductName));
+  const model        = detectPricingModel(primary);
+  const isLegacy     = model === 'legacy';
+  const sortedByPrice= [...primary].sort((a, b) => a.price - b.price);
+  const goKartsOn    = !isLegacy && primary.some(t => isGoKartsTicket(t));
+
+  /* ── Header copy ── */
+  $('spH1').textContent     = isLegacy ? 'Ticket Options' : 'Unlimited Play';
+  $('spSubline').innerHTML  = isLegacy
+    ? 'Pick Your Level of Play &middot; Deluxe to Platinum!'
+    : 'Unlimited Fun &middot; No Time Limits &middot; Adventure Unlimited!';
+
+  /* ── Panel grid ratio ── */
+  const panels = $('spPanels');
+  panels.className = 'sp-panels';
+  if (isLegacy)       panels.classList.add('sp-legacy');
+  else if (!goKartsOn) panels.classList.add('sp-no-gokarts');
+
+  /* ── Ticket cells ── */
+  const split = $('spTicketsSplit');
+  split.innerHTML  = '';
+  split.className  = 'sp-tickets-split';
+
+  if (isLegacy) {
+    split.classList.add('sp-triple');
+    let cumulativeAttrNames = new Set();
+    sortedByPrice.forEach((t, i) => {
+      const ctaStyle = i < sortedByPrice.length - 1 ? 'outline' : 'solid';
+      split.innerHTML += buildTicketCell(t, ticketUrl, ctaStyle, i > 0, true, cumulativeAttrNames);
+      (t.attractions || []).forEach(a => cumulativeAttrNames.add(a.name));
+    });
+  } else {
+    const base    = sortedByPrice[0];
+    const upgrade = goKartsOn ? sortedByPrice[sortedByPrice.length - 1] : null;
+    if (!goKartsOn) split.classList.add('sp-single');
+    if (base) split.innerHTML += buildTicketCell(base, ticketUrl, 'outline', false, false, new Set());
+    if (upgrade && upgrade !== base)
+      split.innerHTML += buildTicketCell(upgrade, ticketUrl, 'solid', true, false, new Set());
+  }
+
+  /* ── Ticket add-ons ── */
+  const ticketAddons = $('spTicketAddons');
+  ticketAddons.className = 'sp-addon-grid' + (isLegacy ? ' sp-stacked' : '');
+  ticketAddons.innerHTML = buildTicketAddons(secondary, merch, isLegacy);
+
+  /* ── Membership panel ── */
+  const cheapestMember = [...memberships]
+    .filter(p => !/shorty|parent/i.test(p.parkProductName))
+    .sort((a, b) => a.price - b.price)[0];
+
+  if (cheapestMember) {
+    $('spMemberPrice').innerHTML = fmtPrice(cheapestMember.price)
+      + `<span class="sp-member-mo">/mo</span>`;
+  }
+
+  /* Half badge */
+  const halfBadge = $('spHalfBadge');
+  if (isLegacy) {
+    halfBadge.style.display = 'none';
+  } else {
+    halfBadge.style.display = '';
+    $('spHalfSub').innerHTML = goKartsOn
+      ? 'the cost of<br>Unlimited&nbsp;Play&nbsp;+'
+      : 'the cost of<br>Unlimited&nbsp;Play';
+  }
+
+  $('spMemberDescriptor').textContent = (goKartsOn && !isLegacy)
+    ? 'Unlimited Visits, Go-Karts Included!'
+    : 'Unlimited Visits, Every Month!';
+
+  $('spMemberCta').href = memberUrl;
+
+  /* ── Member add-ons ── */
+  const memberAddons = $('spMemberAddons');
+  memberAddons.className = 'sp-addon-grid' + (isLegacy ? ' sp-stacked' : '');
+  memberAddons.innerHTML = buildMemberAddons(memberships, secondary, merch, isLegacy);
+
+  /* ── Attractions gallery ── */
+  renderAttractionsGallery(attractions, wpAttractions, locationSlug, goKartsOn);
+
+  /* ── Show ── */
+  $('spWrap').classList.remove('hidden');
+}
+
 /* ─── Tab switching ─── */
 
 async function switchTab(tab) {
   if (!currentParkId) return;
   activeTab = tab;
 
-  /* Update tab button styles */
   document.querySelectorAll('.tab-btn').forEach(btn => {
     const isActive = btn.dataset.tab === tab;
     btn.classList.toggle('active', isActive);
     btn.style.borderBottomColor = isActive ? btn.dataset.color : 'transparent';
   });
 
-  /* Show correct panel */
   document.querySelectorAll('.tab-panel').forEach(panel => {
     panel.classList.toggle('active', panel.dataset.tab === tab);
   });
 
-  const parkId  = currentParkId;
-  const loadEl  = $(`tabLoad${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
+  const parkId = currentParkId;
+  const loadEl = $(`tabLoad${tab.charAt(0).toUpperCase() + tab.slice(1)}`);
 
-  /* Already cached — render immediately */
-  if (CACHE[parkId]?.[tab]) {
+  /* Hide the simplified pricing wrap before a potential reload */
+  if (tab === 'tickets') $('spWrap').classList.add('hidden');
+
+  const cacheKey = tab === 'memberships' ? 'memberships_tab' : tab;
+  if (CACHE[parkId]?.[cacheKey]) {
     loadEl?.classList.remove('on');
-    applyRender(tab, CACHE[parkId][tab], parkId);
+    applyRender(tab, CACHE[parkId][cacheKey], parkId);
     return;
   }
 
-  /* Show inline spinner */
-  hideSec('ticketSec'); hideSec('bundleSec'); hideSec('merchSec');
-  hideSec('attractionSecT'); hideSec('attractionSecM');
-  hideSec('bdaySec'); hideSec('memberSec'); hideSec('annualSec');
   loadEl?.classList.add('on');
 
   try {
     const data = await loaderFor(tab)(parkId);
     loadEl?.classList.remove('on');
     applyRender(tab, data, parkId);
-    /* Background-prefetch the other two tabs silently */
     ['tickets','birthdays','memberships']
       .filter(t => t !== tab)
       .forEach(t => loaderFor(t)(parkId).catch(() => {}));
@@ -1024,7 +1547,7 @@ function loaderFor(tab) {
 }
 
 function applyRender(tab, data, parkId) {
-  if (tab === 'tickets')     renderTickets(data, parkId);
+  if (tab === 'tickets')     renderTickets(data);
   if (tab === 'birthdays')   renderBirthdays(data);
   if (tab === 'memberships') renderMemberships(data);
 }
@@ -1035,16 +1558,16 @@ $('sel').addEventListener('change', async e => {
   const park = JSON.parse(e.target.value);
   sessionStorage.setItem('ua_park', e.target.value);
 
-  currentParkId   = park.id;
-  currentParkName = park.name;
+  currentParkId       = park.id;
+  currentParkName     = park.name;
+  currentUrlSlug      = park.urlSlug || '';
+  currentLocationSlug = buildLocationSlug(park.name);
 
   hideEl('empty');
   hideEl('errBox');
+  $('spWrap').classList.add('hidden');
 
-  /* Reset sections and switch to Tickets tab */
-  hideSec('ticketSec'); hideSec('bundleSec'); hideSec('merchSec');
-  hideSec('attractionSecT'); hideSec('attractionSecM');
-  hideSec('bdaySec'); hideSec('memberSec'); hideSec('annualSec');
+  /* Reset to Tickets tab */
   activeTab = 'tickets';
   document.querySelectorAll('.tab-btn').forEach(btn => {
     const isActive = btn.dataset.tab === 'tickets';
@@ -1055,13 +1578,11 @@ $('sel').addEventListener('change', async e => {
     p.classList.toggle('active', p.dataset.tab === 'tickets');
   });
 
-  /* Show content area + tab bar */
   const main = $('content');
   main.classList.remove('on');
   main.classList.add('on');
   showEl('tabBar');
 
-  /* Load tickets tab */
   await switchTab('tickets');
 });
 
@@ -1082,16 +1603,23 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     const sel = $('sel');
     sel.innerHTML = '<option value="" disabled selected>Select a location…</option>';
     parks.forEach(p => {
-      const opt = document.createElement('option');
-      opt.value = JSON.stringify({ id: p.id, name: p.name });
+      const opt  = document.createElement('option');
+      opt.value  = JSON.stringify({ id: p.id, name: p.name, urlSlug: p.urlSlug || '' });
       const [city, state = ''] = p.name.split(',').map(s => s.trim());
       opt.textContent = state ? `${state} - ${city}` : p.name;
       sel.appendChild(opt);
     });
     const saved = sessionStorage.getItem('ua_park');
     if (saved) {
+      /* Try to match by park id in case the stored value differs */
+      let savedId = null;
+      try { savedId = JSON.parse(saved).id; } catch {}
       for (const opt of sel.options) {
-        if (opt.value === saved) { sel.value = saved; sel.dispatchEvent(new Event('change')); break; }
+        if (!opt.value) continue;
+        try {
+          const v = JSON.parse(opt.value);
+          if (v.id === savedId) { sel.value = opt.value; sel.dispatchEvent(new Event('change')); break; }
+        } catch {}
       }
     }
   } catch (err) {
