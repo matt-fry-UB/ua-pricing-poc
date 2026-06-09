@@ -1108,10 +1108,12 @@ async function loadTickets(parkId) {
     CACHE[parkId].attractions = extractAttractions(memberships);
   }
 
+  const hideProduct = name => /adventure\s*4\s*all|adventure\s*for\s*all/i.test(name);
+
   const data = {
-    tickets:      stripSuffixes(cleanAll(allTickets)),
-    merch:        cleanAll(merch),
-    memberships:  stripSuffixes(cleanAll(memberships)),
+    tickets:      stripSuffixes(cleanAll(allTickets)).filter(p => !hideProduct(p.parkProductName)),
+    merch:        cleanAll(merch).filter(p => !hideProduct(p.parkProductName)),
+    memberships:  stripSuffixes(cleanAll(memberships)).filter(p => !hideProduct(p.parkProductName)),
     attractions:  CACHE[parkId].attractions,
     wpAttractions,
   };
