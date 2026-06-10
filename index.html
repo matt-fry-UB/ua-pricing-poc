@@ -1037,7 +1037,7 @@ async function findLimitId(parkId, stepEl) {
 }
 
 /* ─── Pricing model helpers ─── */
-const isSecondaryTicket = name => /\b(parent|shorty)\b/i.test(name);
+const isSecondaryTicket = name => /\b(parent|shorty)\b|\b5\s*(?:&amp;|&|and\b)?\s*under\b/i.test(name);
 const isGoKartsTicket   = t => /go.?kart|unlimited play\s*\+/i.test(t.parkProductName)
   || (t.attractions || []).some(a => /go.?kart/i.test(a.name));
 
@@ -1261,6 +1261,8 @@ function buildTicketCell(ticket, ticketUrl, ctaStyle, hasDivider, isLegacy, lowe
 }
 
 function buildTicketAddons(secondary, merch, isStacked, basePrice) {
+  const fiveUnder = secondary.find(p => /\b5\s*(?:&amp;|&|and)?\s*under\b/i.test(p.parkProductName))
+                 || merch.find(p => /\b5\s*(?:&amp;|&|and)?\s*under\b/i.test(p.parkProductName));
   const shorty = secondary.find(p => /shorty/i.test(p.parkProductName))
               || merch.find(p => /shorty/i.test(p.parkProductName));
   const parent = secondary.find(p => /parent/i.test(p.parkProductName))
@@ -1270,6 +1272,11 @@ function buildTicketAddons(secondary, merch, isStacked, basePrice) {
   const parentDisplay = basePrice != null ? fmtPrice(Math.floor(basePrice / 2 * 100) / 100) : '50%';
 
   let html = '';
+  if (fiveUnder) html += `
+<div class="sp-addon-card sp-addon-ticket">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-t">5 &amp; Under</h4><p class="sp-addon-desc-t">For children 5 &amp; under.</p></div>
+  <span class="sp-addon-price-t">${fmtPrice(fiveUnder.price)}</span>
+</div>`;
   if (shorty) html += `
 <div class="sp-addon-card sp-addon-ticket">
   <div class="sp-addon-info"><h4 class="sp-addon-name-t">Shorty 40&Prime;</h4><p class="sp-addon-desc-t">For children 40&Prime; &amp; under.</p></div>
@@ -1289,6 +1296,8 @@ function buildTicketAddons(secondary, merch, isStacked, basePrice) {
 }
 
 function buildMemberAddons(memberships, secondary, merch, isStacked, baseMemberPrice) {
+  const mFiveUnder = memberships.find(p => /\b5\s*(?:&amp;|&|and)?\s*under\b/i.test(p.parkProductName))
+                  || secondary.find(p => /\b5\s*(?:&amp;|&|and)?\s*under\b/i.test(p.parkProductName));
   const mShorty = memberships.find(p => /shorty/i.test(p.parkProductName))
                || secondary.find(p => /shorty/i.test(p.parkProductName));
   const mParent = memberships.find(p => /parent/i.test(p.parkProductName))
@@ -1297,6 +1306,11 @@ function buildMemberAddons(memberships, secondary, merch, isStacked, baseMemberP
   const parentDisplay = baseMemberPrice != null ? fmtPrice(Math.floor(baseMemberPrice / 2 * 100) / 100) : '50%';
 
   let html = '';
+  if (mFiveUnder) html += `
+<div class="sp-addon-card sp-addon-member">
+  <div class="sp-addon-info"><h4 class="sp-addon-name-m">5 &amp; Under</h4><p class="sp-addon-desc-m">For children 5 &amp; under.</p></div>
+  <span class="sp-addon-price-m">${fmtPrice(mFiveUnder.price)}</span>
+</div>`;
   if (mShorty) html += `
 <div class="sp-addon-card sp-addon-member">
   <div class="sp-addon-info"><h4 class="sp-addon-name-m">Shorty 40&Prime;</h4><p class="sp-addon-desc-m">For children 40&Prime; &amp; under.</p></div>
