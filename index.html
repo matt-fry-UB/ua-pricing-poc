@@ -642,7 +642,7 @@
         <div class="sp-container">
           <div>
             <p class="sp-eyebrow">Choose Your Adventure</p>
-            <h1 class="sp-h1" id="spH1">Unlimited Play</h1>
+            <h1 class="sp-h1" id="spH1">Play All Day</h1>
             <p class="sp-subline" id="spSubline">Unlimited Fun &middot; No Time Limits &middot; Adventure Unlimited!</p>
           </div>
 
@@ -1256,7 +1256,7 @@ function buildTicketCell(ticket, ticketUrl, ctaStyle, hasDivider, isLegacy, lowe
     <span class="sp-price${priceCls}">${fmtPrice(ticket.price)}</span>
   </div>
   ${bodyHTML}
-  <a href="${ticketUrl}" target="_blank" rel="noopener" class="sp-cta sp-cta-${ctaStyle}">Select Pass</a>
+  <a href="${ticketUrl}" target="_blank" rel="noopener" class="sp-cta sp-cta-${ctaStyle}">Select Ticket</a>
 </div>`;
 }
 
@@ -1440,7 +1440,7 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   const goKartsOn    = !isLegacy && primary.some(t => isGoKartsTicket(t));
 
   /* ── Header copy ── */
-  $('spH1').textContent     = isLegacy ? 'Ticket Options' : 'Unlimited Play';
+  $('spH1').textContent     = isLegacy ? 'Ticket Options' : 'Play All Day';
   $('spSubline').innerHTML  = isLegacy
     ? 'Pick Your Level of Play &middot; Deluxe to Platinum!'
     : 'Unlimited Fun &middot; No Time Limits &middot; Adventure Unlimited!';
