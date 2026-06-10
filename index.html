@@ -1579,6 +1579,11 @@ $('sel').addEventListener('change', async e => {
   currentUrlSlug      = park.urlSlug || '';
   currentLocationSlug = buildLocationSlug(park.name);
 
+  /* Reflect the selected location in the URL */
+  if (currentLocationSlug) {
+    history.pushState({ parkId: park.id }, '', '/' + currentLocationSlug);
+  }
+
   /* Kick off the calendar scan immediately so it's ready when the Tickets tab loads */
   if (!CACHE[park.id]) CACHE[park.id] = {};
   if (!CACHE[park.id]._limitIdProm) {
@@ -1631,17 +1636,37 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       opt.textContent = state ? `${state} - ${city}` : p.name;
       sel.appendChild(opt);
     });
-    const saved = sessionStorage.getItem('ua_park');
-    if (saved) {
-      /* Try to match by park id in case the stored value differs */
-      let savedId = null;
-      try { savedId = JSON.parse(saved).id; } catch {}
+    /* Try to restore from URL slug first, then session storage */
+    const urlSlugFromPath = window.location.pathname.replace(/^\//, '').trim();
+    let matched = false;
+
+    if (urlSlugFromPath) {
       for (const opt of sel.options) {
         if (!opt.value) continue;
         try {
           const v = JSON.parse(opt.value);
-          if (v.id === savedId) { sel.value = opt.value; sel.dispatchEvent(new Event('change')); break; }
+          if (buildLocationSlug(v.name) === urlSlugFromPath) {
+            sel.value = opt.value;
+            sel.dispatchEvent(new Event('change'));
+            matched = true;
+            break;
+          }
         } catch {}
+      }
+    }
+
+    if (!matched) {
+      const saved = sessionStorage.getItem('ua_park');
+      if (saved) {
+        let savedId = null;
+        try { savedId = JSON.parse(saved).id; } catch {}
+        for (const opt of sel.options) {
+          if (!opt.value) continue;
+          try {
+            const v = JSON.parse(opt.value);
+            if (v.id === savedId) { sel.value = opt.value; sel.dispatchEvent(new Event('change')); break; }
+          } catch {}
+        }
       }
     }
   } catch (err) {
