@@ -379,7 +379,6 @@
     }
     .sp-panels.sp-legacy     { grid-template-columns: 2.1fr 0.9fr; }
     .sp-panels.sp-no-gokarts { grid-template-columns: 1fr 1fr; }
-    .sp-panels.sp-solo       { grid-template-columns: 0.7fr 1fr; }
     @media (max-width: 1023px) { .sp-panels { grid-template-columns: 1fr !important; } }
 
     .sp-col { display: flex; flex-direction: column; gap: 20px; }
@@ -1445,9 +1444,7 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   const panels = $('spPanels');
   panels.className = 'sp-panels';
   const isTriple = isLegacy && sortedByPrice.length >= 3;
-  const isSolo   = !isLegacy && !goKartsOn && sortedByPrice.length <= 1;
-  if (isTriple)   panels.classList.add('sp-legacy');
-  else if (isSolo) panels.classList.add('sp-solo');
+  if (isTriple)             panels.classList.add('sp-legacy');
   else if (!goKartsOn && !isLegacy) panels.classList.add('sp-no-gokarts');
 
   /* ── Ticket cells ── */
