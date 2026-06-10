@@ -677,7 +677,7 @@
                   </div>
                   <p class="sp-member-descriptor" id="spMemberDescriptor">Unlimited Visits, Go-Karts Included!</p>
                   <p class="sp-member-subtext">Plus member pricing on everything below.</p>
-                  <a id="spMemberCta" href="#" target="_blank" rel="noopener" class="sp-cta sp-cta-member">Join Now</a>
+                  <a id="spMemberCta" href="#" target="_blank" rel="noopener" class="sp-cta sp-cta-member">Learn More</a>
                 </div>
               </div>
               <div class="sp-addon-grid" id="spMemberAddons"><!-- filled by JS --></div>
@@ -1428,8 +1428,8 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   const ticketUrl = urlSlug
     ? `https://store.unleashedbrands.com/urban-air/${urlSlug}/purchase/ticket`
     : '#';
-  const memberUrl = urlSlug
-    ? `https://store.unleashedbrands.com/urban-air/${urlSlug}/purchase/membership`
+  const memberUrl = locationSlug
+    ? `https://www.urbanair.com/${locationSlug}/membership`
     : '#';
 
   const secondary    = tickets.filter(p =>  isSecondaryTicket(p.parkProductName));
