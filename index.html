@@ -1296,7 +1296,7 @@ function buildTicketAddons(secondary, merch, isStacked, basePrice) {
               || merch.find(p => /parent/i.test(p.parkProductName));
   const socks  = merch.find(p => /sock/i.test(p.parkProductName));
   const wide   = isStacked ? '' : ' sp-addon-wide';
-  const parentDisplay = basePrice != null ? fmtPrice(basePrice / 2) : '50%';
+  const parentDisplay = basePrice != null ? fmtPrice(Math.floor(basePrice / 2 * 100) / 100) : '50%';
 
   let html = '';
   if (shorty) html += `
