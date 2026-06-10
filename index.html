@@ -1319,15 +1319,27 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
   const grid = $('spGalleryGrid');
   if (!apiAttractions?.length) { grid.innerHTML = ''; return; }
 
-  /* Build WP lookup by normalised name */
-  const norm   = s => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
-  const wpMap  = {};
+  /* Normalize: lowercase, collapse &/and/&amp; to nothing, strip non-alphanumeric */
+  const norm = s => (s || '')
+    .toLowerCase()
+    .replace(/&amp;/gi, ' ')
+    .replace(/\band\b/g, ' ')
+    .replace(/&/g, ' ')
+    .replace(/[^a-z0-9]/g, '');
+
+  /* Build WP lookup — index by both full title and title without leading "the" */
+  const wpMap = {};
   (wpAttractions || []).forEach(wa => {
     const title = wa.title || wa.title?.rendered || wa.name || '';
-    if (title) wpMap[norm(title)] = wa;
+    if (!title) return;
+    const key = norm(title);
+    wpMap[key] = wa;
+    /* Also index without leading "the" so "The APEX…" matches "APEX…" */
+    const noThe = key.replace(/^the/, '');
+    if (noThe !== key) wpMap[noThe] = wa;
   });
 
-  /* API name → WP title (normalized) for cases where the names differ */
+  /* Explicit aliases for names that diverge more than normalization can fix */
   const WP_ALIASES = {
     'skyriderindoorzipline': 'skyrider',
     'runway':                'runwaytumbletrack',
@@ -1339,9 +1351,22 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
     'climbinghill':          'climbingwalls',
     'climbingwall':          'climbingwalls',
     'ropescourse':           'warriorcourse',
+    'warriorobstaclecourse': 'warriorcourse',
     'indoorropes':           'warriorcourse',
   };
-  const wpFind = n => wpMap[n] || wpMap[WP_ALIASES[n]] || null;
+
+  const wpFind = n => {
+    if (!n) return null;
+    if (wpMap[n]) return wpMap[n];
+    if (WP_ALIASES[n] && wpMap[WP_ALIASES[n]]) return wpMap[WP_ALIASES[n]];
+    /* Substring fallback: one name fully contains the other (min 7 chars to avoid short false positives) */
+    if (n.length >= 7) {
+      for (const [key, wa] of Object.entries(wpMap)) {
+        if (key.length >= 5 && (key.includes(n) || n.includes(key))) return wa;
+      }
+    }
+    return null;
+  };
 
   const FALLBACK_IMG = 'https://www.urbanair.com/wp-content/uploads/2022/05/353573_standard-1.jpeg';
 
