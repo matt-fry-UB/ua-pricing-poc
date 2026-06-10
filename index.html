@@ -379,6 +379,7 @@
     }
     .sp-panels.sp-legacy     { grid-template-columns: 2.1fr 0.9fr; }
     .sp-panels.sp-no-gokarts { grid-template-columns: 1fr 1fr; }
+    .sp-panels.sp-solo       { grid-template-columns: 0.7fr 1fr; }
     @media (max-width: 1023px) { .sp-panels { grid-template-columns: 1fr !important; } }
 
     .sp-col { display: flex; flex-direction: column; gap: 20px; }
@@ -574,12 +575,16 @@
       background: rgba(56,56,56,0.78);
       opacity: 0; transition: opacity 0.3s ease;
       display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      padding: 40px; text-align: center; color: #fff;
+      justify-content: flex-end;
+      padding: 20px; color: #fff;
     }
     .sp-attraction-card:hover .sp-attr-overlay { opacity: 1; }
-    .sp-attr-overlay p { font-size: 14px; font-weight: 600; margin-bottom: 20px; max-width: 320px; }
-    .sp-featured-card .sp-attr-overlay p { font-size: 18px; }
+    .sp-attr-overlay p {
+      font-size: 13px; font-weight: 600; margin-bottom: 10px;
+      display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .sp-featured-card .sp-attr-overlay p { font-size: 15px; -webkit-line-clamp: 4; }
     .sp-attr-overlay a {
       color: #e0e621; font-size: 12px; font-weight: 700;
       text-transform: uppercase; text-decoration: none;
@@ -1080,7 +1085,7 @@ async function loadTickets(parkId) {
   const clean = makeCleaner(currentParkName);
   const cleanAll = arr => arr.map(p => ({ ...p, parkProductName: clean(p.parkProductName) }));
 
-  const { limitId, date } = await findLimitId(parkId, step);
+  const { limitId, date } = await (CACHE[parkId]._limitIdProm || findLimitId(parkId, step));
   if (step) step.textContent = limitId ? 'Loading tickets…' : 'No upcoming schedule found';
 
   const [allTickets, merch, memberships, wpAttractions] = await Promise.all([
@@ -1109,7 +1114,7 @@ async function loadTickets(parkId) {
     CACHE[parkId].attractions = extractAttractions(allTickets.length ? allTickets : memberships);
   }
 
-  const hideProduct = name => /adventure\s*4\s*all|adventure\s*for\s*all/i.test(name);
+  const hideProduct = name => /adventure\s*4\s*all|adventure\s*for\s*all|bring.a.friend.friday/i.test(name);
 
   const data = {
     tickets:      stripSuffixes(cleanAll(allTickets)).filter(p => !hideProduct(p.parkProductName)),
@@ -1262,7 +1267,6 @@ function buildTicketCell(ticket, ticketUrl, ctaStyle, hasDivider, isLegacy, lowe
         ? 'Everything in Deluxe, plus:'
         : 'Everything in Ultimate and Deluxe, plus:';
     bodyHTML = `
-      <p class="sp-descriptor sp-has-list">${ticket.description || 'Classic Thrills'}</p>
       ${tierAttrs.length ? `
         <p class="sp-tier-lead">${leadin}</p>
         <ul class="sp-tier-list">${tierAttrs.map(a => `<li>${a.name}</li>`).join('')}</ul>
@@ -1271,9 +1275,7 @@ function buildTicketCell(ticket, ticketUrl, ctaStyle, hasDivider, isLegacy, lowe
     const subtext = ctaStyle === 'solid'
       ? 'All Day Play, plus unlimited laps.'
       : 'Every attraction. All day long.';
-    bodyHTML = `
-      <p class="sp-descriptor">${ticket.description || 'All Day Play Ticket'}</p>
-      <p class="sp-subtext">${subtext}</p>`;
+    bodyHTML = `<p class="sp-subtext">${subtext}</p>`;
   }
 
   return `
@@ -1305,7 +1307,7 @@ function buildTicketAddons(secondary, merch, isStacked) {
   if (parent) html += `
 <div class="sp-addon-card sp-addon-ticket">
   <div class="sp-addon-info"><h4 class="sp-addon-name-t">Parent Ticket</h4><p class="sp-addon-desc-t">With purchase of a child&rsquo;s pass.</p></div>
-  <span class="sp-addon-price-t">${fmtPrice(parent.price)}</span>
+  <span class="sp-addon-price-t">50% off</span>
 </div>`;
   if (socks) html += `
 <div class="sp-addon-card sp-addon-ticket${wide}">
@@ -1331,7 +1333,7 @@ function buildMemberAddons(memberships, secondary, merch, isStacked) {
   if (mParent) html += `
 <div class="sp-addon-card sp-addon-member">
   <div class="sp-addon-info"><h4 class="sp-addon-name-m">Parent Membership</h4><p class="sp-addon-desc-m">With purchase of a child&rsquo;s pass.</p></div>
-  <span class="sp-addon-price-m">${fmtPrice(mParent.price)}</span>
+  <span class="sp-addon-price-m">50% off</span>
 </div>`;
   html += `
 <div class="sp-addon-card sp-addon-member${wide}">
@@ -1443,7 +1445,9 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   const panels = $('spPanels');
   panels.className = 'sp-panels';
   const isTriple = isLegacy && sortedByPrice.length >= 3;
-  if (isTriple)        panels.classList.add('sp-legacy');
+  const isSolo   = !isLegacy && !goKartsOn && sortedByPrice.length <= 1;
+  if (isTriple)   panels.classList.add('sp-legacy');
+  else if (isSolo) panels.classList.add('sp-solo');
   else if (!goKartsOn && !isLegacy) panels.classList.add('sp-no-gokarts');
 
   /* ── Ticket cells ── */
@@ -1577,6 +1581,12 @@ $('sel').addEventListener('change', async e => {
   currentParkName     = park.name;
   currentUrlSlug      = park.urlSlug || '';
   currentLocationSlug = buildLocationSlug(park.name);
+
+  /* Kick off the calendar scan immediately so it's ready when the Tickets tab loads */
+  if (!CACHE[park.id]) CACHE[park.id] = {};
+  if (!CACHE[park.id]._limitIdProm) {
+    CACHE[park.id]._limitIdProm = findLimitId(park.id, null);
+  }
 
   hideEl('empty');
   hideEl('errBox');
