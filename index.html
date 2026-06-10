@@ -1103,9 +1103,10 @@ async function loadTickets(parkId) {
 
   if (!CACHE[parkId]) CACHE[parkId] = {};
 
-  /* Share attractions with the memberships tab cache */
+  /* Extract per-park attractions from ticket products (date-scoped to this location).
+     Fall back to memberships only if no tickets were returned. */
   if (!('attractions' in CACHE[parkId])) {
-    CACHE[parkId].attractions = extractAttractions(memberships);
+    CACHE[parkId].attractions = extractAttractions(allTickets.length ? allTickets : memberships);
   }
 
   const hideProduct = name => /adventure\s*4\s*all|adventure\s*for\s*all/i.test(name);
