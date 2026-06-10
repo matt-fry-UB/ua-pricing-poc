@@ -1332,11 +1332,18 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
     'skyriderindoorzipline': 'skyrider',
     'runway':                'runwaytumbletrack',
     'tubesindoorplayground': 'tubesplayground',
+    'tubeslide':             'tubeslides',
     'gokarts':               'gokarttracks',
     'gokarttrack':           'gokarttracks',
     'indoorgokarts':         'gokarttracks',
+    'climbinghill':          'climbingwalls',
+    'climbingwall':          'climbingwalls',
+    'ropescourse':           'warriorcourse',
+    'indoorropes':           'warriorcourse',
   };
   const wpFind = n => wpMap[n] || wpMap[WP_ALIASES[n]] || null;
+
+  const FALLBACK_IMG = 'https://www.urbanair.com/wp-content/uploads/2022/05/353573_standard-1.jpeg';
 
   const wpImg  = wa => wa?.featured_image || wa?.acf?.image?.url || wa?.featured_image_url || '';
   const wpDesc = wa => (wa?.excerpt || wa?.description || wa?.acf?.description || '').replace(/<[^>]+>/g, '').trim();
@@ -1377,7 +1384,7 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
       : 'https://www.urbanair.com/attractions/';
     html += `
 <div class="sp-attraction-card">
-  ${img ? `<img src="${img}" alt="${attr.name}" loading="lazy">` : `<div class="sp-img-placeholder"></div>`}
+  <img src="${img || FALLBACK_IMG}" alt="${attr.name}" loading="lazy">
   <div class="sp-attr-name-pill">${attr.name}</div>
   <div class="sp-attr-overlay">
     ${desc ? `<p>${desc}</p>` : ''}
