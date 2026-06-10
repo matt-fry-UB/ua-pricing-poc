@@ -1289,13 +1289,14 @@ function buildTicketCell(ticket, ticketUrl, ctaStyle, hasDivider, isLegacy, lowe
 </div>`;
 }
 
-function buildTicketAddons(secondary, merch, isStacked) {
+function buildTicketAddons(secondary, merch, isStacked, basePrice) {
   const shorty = secondary.find(p => /shorty/i.test(p.parkProductName))
               || merch.find(p => /shorty/i.test(p.parkProductName));
   const parent = secondary.find(p => /parent/i.test(p.parkProductName))
               || merch.find(p => /parent/i.test(p.parkProductName));
   const socks  = merch.find(p => /sock/i.test(p.parkProductName));
   const wide   = isStacked ? '' : ' sp-addon-wide';
+  const parentDisplay = basePrice != null ? fmtPrice(basePrice / 2) : '50%';
 
   let html = '';
   if (shorty) html += `
@@ -1306,7 +1307,7 @@ function buildTicketAddons(secondary, merch, isStacked) {
   if (parent) html += `
 <div class="sp-addon-card sp-addon-ticket">
   <div class="sp-addon-info"><h4 class="sp-addon-name-t">Parent Ticket</h4><p class="sp-addon-desc-t">With purchase of a child&rsquo;s pass.</p></div>
-  <span class="sp-addon-price-t">50% off</span>
+  <span class="sp-addon-price-t">${parentDisplay}</span>
 </div>`;
   if (socks) html += `
 <div class="sp-addon-card sp-addon-ticket${wide}">
@@ -1316,12 +1317,13 @@ function buildTicketAddons(secondary, merch, isStacked) {
   return html;
 }
 
-function buildMemberAddons(memberships, secondary, merch, isStacked) {
+function buildMemberAddons(memberships, secondary, merch, isStacked, baseMemberPrice) {
   const mShorty = memberships.find(p => /shorty/i.test(p.parkProductName))
                || secondary.find(p => /shorty/i.test(p.parkProductName));
   const mParent = memberships.find(p => /parent/i.test(p.parkProductName))
                || secondary.find(p => /parent/i.test(p.parkProductName));
   const wide    = isStacked ? '' : ' sp-addon-wide';
+  const parentDisplay = baseMemberPrice != null ? fmtPrice(baseMemberPrice / 2) : '50%';
 
   let html = '';
   if (mShorty) html += `
@@ -1332,7 +1334,7 @@ function buildMemberAddons(memberships, secondary, merch, isStacked) {
   if (mParent) html += `
 <div class="sp-addon-card sp-addon-member">
   <div class="sp-addon-info"><h4 class="sp-addon-name-m">Parent Membership</h4><p class="sp-addon-desc-m">With purchase of a child&rsquo;s pass.</p></div>
-  <span class="sp-addon-price-m">50% off</span>
+  <span class="sp-addon-price-m">${parentDisplay}</span>
 </div>`;
   html += `
 <div class="sp-addon-card sp-addon-member${wide}">
@@ -1472,7 +1474,8 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   /* ── Ticket add-ons ── */
   const ticketAddons = $('spTicketAddons');
   ticketAddons.className = 'sp-addon-grid' + (isLegacy ? ' sp-stacked' : '');
-  ticketAddons.innerHTML = buildTicketAddons(secondary, merch, isLegacy);
+  const baseTicketPrice = !isLegacy ? (sortedByPrice[0]?.price ?? null) : null;
+  ticketAddons.innerHTML = buildTicketAddons(secondary, merch, isLegacy, baseTicketPrice);
 
   /* ── Membership panel ── */
   const cheapestMember = [...memberships]
@@ -1504,7 +1507,8 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   /* ── Member add-ons ── */
   const memberAddons = $('spMemberAddons');
   memberAddons.className = 'sp-addon-grid' + (isLegacy ? ' sp-stacked' : '');
-  memberAddons.innerHTML = buildMemberAddons(memberships, secondary, merch, isLegacy);
+  const baseMemberPrice = !isLegacy ? (cheapestMember?.price ?? null) : null;
+  memberAddons.innerHTML = buildMemberAddons(memberships, secondary, merch, isLegacy, baseMemberPrice);
 
   /* ── Attractions gallery ── */
   renderAttractionsGallery(attractions, wpAttractions, locationSlug, goKartsOn);
