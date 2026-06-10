@@ -84,27 +84,6 @@
       color: rgba(255,255,255,.45); pointer-events: none;
     }
 
-    /* ── Tab bar ── */
-    .tab-bar {
-      display: none;
-      padding: 0 20px;
-      border-top: 1px solid rgba(255,255,255,.08);
-    }
-    .tab-bar.on { display: flex; }
-    .tab-btn {
-      font-family: var(--font-h);
-      font-size: 13px; font-weight: 600;
-      letter-spacing: .06em; text-transform: uppercase;
-      padding: 9px 18px 7px;
-      border: none; background: transparent; cursor: pointer;
-      color: rgba(255,255,255,.38);
-      border-bottom: 3px solid transparent;
-      margin-bottom: -3px;
-      transition: color .15s, border-color .15s;
-      white-space: nowrap;
-    }
-    .tab-btn:hover { color: rgba(255,255,255,.7); }
-    .tab-btn.active { color: var(--white); }
 
     /* ── States ── */
     .state {
@@ -628,17 +607,6 @@
       </svg>
     </div>
   </div>
-  <nav id="tabBar" class="tab-bar">
-    <button class="tab-btn active" data-tab="tickets" data-color="#e50695" style="border-bottom-color:#e50695">
-      Tickets &amp; Bundles
-    </button>
-    <button class="tab-btn" data-tab="birthdays" data-color="#C2410C">
-      Birthday Parties
-    </button>
-    <button class="tab-btn" data-tab="memberships" data-color="#B45309">
-      Memberships &amp; Passes
-    </button>
-  </nav>
 </header>
 
 <!-- ── Empty state ── -->
@@ -844,6 +812,9 @@ let currentParkName     = '';
 let currentUrlSlug      = '';
 let currentLocationSlug = '';
 let activeTab           = 'tickets';
+let _bootTab            = null;
+
+const URL_SECTION_MAP = { birthday: 'birthdays', membership: 'memberships' };
 
 /* ─── State abbreviation → URL slug map ─── */
 const STATE_NAMES = {
@@ -1523,12 +1494,6 @@ async function switchTab(tab) {
   if (!currentParkId) return;
   activeTab = tab;
 
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    const isActive = btn.dataset.tab === tab;
-    btn.classList.toggle('active', isActive);
-    btn.style.borderBottomColor = isActive ? btn.dataset.color : 'transparent';
-  });
-
   document.querySelectorAll('.tab-panel').forEach(panel => {
     panel.classList.toggle('active', panel.dataset.tab === tab);
   });
@@ -1598,29 +1563,13 @@ $('sel').addEventListener('change', async e => {
   hideEl('errBox');
   $('spWrap').classList.add('hidden');
 
-  /* Reset to Tickets tab */
-  activeTab = 'tickets';
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    const isActive = btn.dataset.tab === 'tickets';
-    btn.classList.toggle('active', isActive);
-    btn.style.borderBottomColor = isActive ? btn.dataset.color : 'transparent';
-  });
-  document.querySelectorAll('.tab-panel').forEach(p => {
-    p.classList.toggle('active', p.dataset.tab === 'tickets');
-  });
+  $('content').classList.add('on');
 
-  const main = $('content');
-  main.classList.remove('on');
-  main.classList.add('on');
-  showEl('tabBar');
-
-  await switchTab('tickets');
+  const tabToShow = _bootTab || 'tickets';
+  _bootTab = null;
+  await switchTab(tabToShow);
 });
 
-/* ─── Tab button clicks ─── */
-document.querySelectorAll('.tab-btn').forEach(btn => {
-  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-});
 
 /* ─── Boot: load locations ─── */
 (async () => {
@@ -1640,16 +1589,19 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
       opt.textContent = state ? `${state} - ${city}` : p.name;
       sel.appendChild(opt);
     });
-    /* Try to restore from URL slug first, then session storage */
-    const urlSlugFromPath = window.location.pathname.replace(/^\//, '').trim();
+    /* Parse location slug and optional section from URL path */
+    const pathParts       = window.location.pathname.replace(/^\//, '').split('/').filter(Boolean);
+    const urlLocationSlug = pathParts[0] || '';
+    const urlSubSection   = pathParts[1] || '';
     let matched = false;
 
-    if (urlSlugFromPath) {
+    if (urlLocationSlug) {
       for (const opt of sel.options) {
         if (!opt.value) continue;
         try {
           const v = JSON.parse(opt.value);
-          if (buildLocationSlug(v.name) === urlSlugFromPath) {
+          if (buildLocationSlug(v.name) === urlLocationSlug) {
+            _bootTab = URL_SECTION_MAP[urlSubSection] || 'tickets';
             sel.value = opt.value;
             sel.dispatchEvent(new Event('change'));
             matched = true;
