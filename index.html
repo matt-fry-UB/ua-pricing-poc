@@ -1348,12 +1348,12 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
   const norm   = s => (s || '').toLowerCase().replace(/[^a-z0-9]/g, '');
   const wpMap  = {};
   (wpAttractions || []).forEach(wa => {
-    const title = wa.title?.rendered || wa.name || wa.title || '';
+    const title = wa.title || wa.title?.rendered || wa.name || '';
     if (title) wpMap[norm(title)] = wa;
   });
 
-  const wpImg  = wa => wa?.acf?.image?.url || wa?.featured_image_url || wa?.thumbnail || '';
-  const wpDesc = wa => (wa?.acf?.description || wa?.excerpt?.rendered || '').replace(/<[^>]+>/g, '').trim();
+  const wpImg  = wa => wa?.featured_image || wa?.acf?.image?.url || wa?.featured_image_url || '';
+  const wpDesc = wa => (wa?.excerpt || wa?.description || wa?.acf?.description || '').replace(/<[^>]+>/g, '').trim();
   const wpSlug = wa => wa?.slug || '';
 
   const goKartsAttr = apiAttractions.find(a => /go.?kart/i.test(a.name));
@@ -1430,8 +1430,9 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   /* ── Panel grid ratio ── */
   const panels = $('spPanels');
   panels.className = 'sp-panels';
-  if (isLegacy)       panels.classList.add('sp-legacy');
-  else if (!goKartsOn) panels.classList.add('sp-no-gokarts');
+  const isTriple = isLegacy && sortedByPrice.length >= 3;
+  if (isTriple)        panels.classList.add('sp-legacy');
+  else if (!goKartsOn && !isLegacy) panels.classList.add('sp-no-gokarts');
 
   /* ── Ticket cells ── */
   const split = $('spTicketsSplit');
@@ -1439,7 +1440,7 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
   split.className  = 'sp-tickets-split';
 
   if (isLegacy) {
-    split.classList.add('sp-triple');
+    if (isTriple) split.classList.add('sp-triple');
     let cumulativeAttrNames = new Set();
     sortedByPrice.forEach((t, i) => {
       const ctaStyle = i < sortedByPrice.length - 1 ? 'outline' : 'solid';
