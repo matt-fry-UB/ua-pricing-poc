@@ -1323,7 +1323,7 @@ function buildMemberAddons(memberships, secondary, merch, isStacked, baseMemberP
   const mParent = memberships.find(p => /parent/i.test(p.parkProductName))
                || secondary.find(p => /parent/i.test(p.parkProductName));
   const wide    = isStacked ? '' : ' sp-addon-wide';
-  const parentDisplay = baseMemberPrice != null ? fmtPrice(baseMemberPrice / 2) : '50%';
+  const parentDisplay = baseMemberPrice != null ? fmtPrice(Math.floor(baseMemberPrice / 2 * 100) / 100) : '50%';
 
   let html = '';
   if (mShorty) html += `
