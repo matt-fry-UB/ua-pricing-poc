@@ -1353,6 +1353,17 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
     if (title) wpMap[norm(title)] = wa;
   });
 
+  /* API name → WP title (normalized) for cases where the names differ */
+  const WP_ALIASES = {
+    'skyriderindoorzipline': 'skyrider',
+    'runway':                'runwaytumbletrack',
+    'tubesindoorplayground': 'tubesplayground',
+    'gokarts':               'gokarttracks',
+    'gokarttrack':           'gokarttracks',
+    'indoorgokarts':         'gokarttracks',
+  };
+  const wpFind = n => wpMap[n] || wpMap[WP_ALIASES[n]] || null;
+
   const wpImg  = wa => wa?.featured_image || wa?.acf?.image?.url || wa?.featured_image_url || '';
   const wpDesc = wa => (wa?.excerpt || wa?.description || wa?.acf?.description || '').replace(/<[^>]+>/g, '').trim();
   const wpSlug = wa => wa?.slug || '';
@@ -1364,7 +1375,7 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
 
   /* Featured: Go-Karts tile */
   if (goKartsOn && goKartsAttr) {
-    const wa   = wpMap[norm(goKartsAttr.name)];
+    const wa   = wpFind(norm(goKartsAttr.name));
     const img  = wpImg(wa)  || 'https://www.urbanair.com/wp-content/uploads/2018/03/go-karts-1600x900-1-1080x675.jpg';
     const desc = wpDesc(wa) || 'Put your driving skills to the test and race to the finish with our indoor Go-Karts.';
     const slug = wpSlug(wa) || 'go-karts';
@@ -1383,7 +1394,7 @@ function renderAttractionsGallery(apiAttractions, wpAttractions, locationSlug, g
 
   /* Regular tiles */
   others.forEach(attr => {
-    const wa   = wpMap[norm(attr.name)];
+    const wa   = wpFind(norm(attr.name));
     const img  = wpImg(wa);
     const desc = wpDesc(wa);
     const slug = wpSlug(wa);
