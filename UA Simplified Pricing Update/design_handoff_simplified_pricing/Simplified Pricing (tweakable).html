@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en" data-model="simplified" data-addons="2wide" data-gokarts="on" data-half="on">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Urban Air - Unlimited Play Pricing</title>
+<!-- Google Fonts: Montserrat (stand-in for Azo Sans per 2026 style guide) -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS v3 -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            uaPink: '#e50695',
+            uaYellow: '#e0e621',
+            uaTeal: '#88dbdf',
+            uaCharcoal: '#383838',
+            uaGold: '#ffb600'
+          },
+          fontFamily: {
+            sans: ['Montserrat', 'Helvetica', 'Arial', 'sans-serif'],
+          },
+          borderRadius: {
+            'ua-card': '25px',
+            'ua-pill': '50px',
+          },
+          boxShadow: {
+            'ua': '0px 0px 20px 0px rgba(0, 0, 0, 0.2)',
+          }
+        }
+      }
+    }
+  </script>
+<!-- React + Babel (Tweaks panel only; page itself is plain HTML) -->
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<style data-purpose="custom-styling">
+    body {
+      background-color: #ffffff;
+      color: #0a0a0a;
+      overflow-x: hidden;
+    }
+
+    .ua-cents {
+      font-size: 0.42em;
+      vertical-align: super;
+      letter-spacing: 0;
+      line-height: 1;
+    }
+
+    /* Dot halftone accent texture (allowed per 2026 style guide) */
+    .ua-halftone {
+      background-image: radial-gradient(rgba(255, 255, 255, 0.18) 1.5px, transparent 1.5px);
+      background-size: 14px 14px;
+      -webkit-mask-image: linear-gradient(115deg, black 0%, transparent 45%);
+      mask-image: linear-gradient(115deg, black 0%, transparent 45%);
+    }
+
+    /* ============ Pricing zone background ============ */
+    .pricing-zone { background-color: #f6f2f5; }
+
+    /* ============ Pricing model (tweak: data-model) ============ */
+    html[data-model="simplified"] .lg-only { display: none; }
+    html[data-model="legacy"] .sp-only { display: none; }
+    html[data-model="legacy"] .pricing-panels { grid-template-columns: 2.1fr 0.9fr; }
+    html[data-model="legacy"] .tickets-split { grid-template-columns: repeat(3, 1fr); }
+    html[data-model="legacy"] .ticket-cell { padding-left: 1.25rem; padding-right: 1.25rem; }
+    html[data-model="legacy"] .ticket-cell [data-purpose="price"] { font-size: 3.75rem; }
+    html[data-model="legacy"] .half-badge { display: none; }
+    html[data-model="legacy"] .addon-grid { grid-template-columns: 1fr; }
+    html[data-model="legacy"] .addon-grid .addon-wide { grid-column: span 1; }
+
+    /* ============ Panels layout (tweak: data-gokarts) ============ */
+    .pricing-panels {
+      display: grid;
+      grid-template-columns: 1.16fr 0.84fr;
+      gap: 1.75rem;
+      align-items: stretch;
+    }
+    html[data-gokarts="off"] .pricing-panels { grid-template-columns: 1fr 1fr; }
+    html[data-gokarts="off"] .gk-only { display: none; }
+    html[data-gokarts="off"][data-model="simplified"] .tickets-split { grid-template-columns: 1fr; }
+    html[data-gokarts="off"] .gk-on-text { display: none; }
+    html[data-gokarts="on"] .gk-off-text { display: none; }
+    @media (max-width: 1023px) {
+      .pricing-panels { grid-template-columns: 1fr !important; }
+    }
+
+    /* Tickets panel internal split */
+    .tickets-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      height: 100%;
+    }
+    @media (max-width: 639px) {
+      .tickets-split { grid-template-columns: 1fr !important; }
+      .ticket-cell + .ticket-cell { border-left: none !important; border-top: 2px solid #fdeaf5; }
+    }
+
+    /* ============ Half badge (tweak: data-half) ============ */
+    html[data-half="off"] .half-badge { display: none; }
+
+    /* ============ Add-on cards (tweak: data-addons) ============ */
+    .addon-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+    }
+    .addon-wide { grid-column: span 2; }
+    html[data-addons="stacked"] .addon-grid { grid-template-columns: 1fr; }
+    html[data-addons="stacked"] .addon-wide { grid-column: span 1; }
+    @media (max-width: 480px) {
+      .addon-grid { grid-template-columns: 1fr !important; }
+      .addon-wide { grid-column: span 1 !important; }
+    }
+
+    /* ============ Cards & misc ============ */
+    .panel-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    .panel-card:hover {
+      transform: translateY(-6px);
+      box-shadow: 0 18px 36px rgba(0, 0, 0, 0.18);
+    }
+    .attraction-overlay {
+      background: rgba(56, 56, 56, 0.78);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+    .attraction-card:hover .attraction-overlay { opacity: 1; }
+    /* Featured attraction tile: 2x2 in the gallery grid */
+    .gallery-grid { grid-auto-rows: 16rem; }
+    .gallery-grid > * { height: 100%; }
+    .featured-card { grid-column: span 2; grid-row: span 2; }
+  </style>
+</head>
+<body class="font-sans antialiased">
+<!-- BEGIN: Main Page Content -->
+<main class="relative">
+<!-- BEGIN: Pricing Section (replaces #tickets-pricing-grid) — prices are placeholders from the location pricing feed -->
+<section class="pricing-zone py-16" data-purpose="pricing-section" data-screen-label="Pricing" id="tickets-pricing-grid">
+<div class="max-w-7xl mx-auto px-6">
+<!-- Section header -->
+<div class="text-center mb-10">
+<p class="text-uaPink font-extrabold uppercase tracking-[0.25em] text-sm mb-3">Choose Your Adventure</p>
+<h1 class="text-5xl md:text-6xl font-black uppercase tracking-tight text-uaCharcoal mb-3"><span class="sp-only">Unlimited Play</span><span class="lg-only">Ticket Options</span></h1>
+<p class="text-lg font-semibold text-gray-500"><span class="sp-only">Unlimited Fun &middot; No Time Limits &middot; Adventure Unlimited!</span><span class="lg-only">Pick Your Level of Play &middot; Deluxe to Platinum!</span></p>
+</div>
+<!-- Panels: Tickets (left) + Membership (right) -->
+<div class="pricing-panels">
+<!-- Tickets column -->
+<div class="flex flex-col gap-5">
+<div class="panel-card bg-white rounded-ua-card shadow-ua overflow-hidden flex-grow" data-purpose="tickets-panel">
+<div class="tickets-split">
+<!-- Unlimited Play -->
+<div class="ticket-cell sp-only flex flex-col items-center text-center px-8 py-10">
+<h3 class="text-[26px] font-black uppercase tracking-tight text-uaCharcoal leading-none">Unlimited Play</h3>
+<span class="block w-10 h-1 bg-uaPink rounded-full mt-2.5 mb-7"></span>
+<div class="h-[100px] flex items-center justify-center mb-2">
+<span class="text-uaPink font-black text-7xl leading-none whitespace-nowrap" data-purpose="price">$29<span class="ua-cents">99</span></span>
+</div>
+<p class="text-uaCharcoal font-extrabold text-xl uppercase mb-1.5">All Day Play Ticket</p>
+<p class="text-gray-500 font-semibold text-sm flex-grow">Every attraction. All day long.</p>
+<a href="https://store.unleashedbrands.com/urban-air/westlake-oh/purchase/ticket" target="_blank" rel="noopener" class="block text-center w-full max-w-[240px] border-[3px] border-uaPink text-uaPink font-bold py-3.5 rounded-ua-pill uppercase tracking-wider hover:bg-uaPink hover:text-white transition-all mt-6">Select Pass</a>
+</div>
+<!-- Unlimited Play + -->
+<div class="ticket-cell gk-only sp-only flex flex-col items-center text-center px-8 py-10 border-l-2 border-[#fdeaf5]">
+<h3 class="text-[26px] font-black uppercase tracking-tight text-uaCharcoal leading-none">Unlimited Play +</h3>
+<span class="block w-10 h-1 bg-uaPink rounded-full mt-2.5 mb-7"></span>
+<div class="h-[100px] flex items-center justify-center mb-2">
+<span class="text-uaPink font-black text-7xl leading-none whitespace-nowrap" data-purpose="price">$39<span class="ua-cents">99</span></span>
+</div>
+<p class="text-uaCharcoal font-extrabold text-xl uppercase mb-1.5">Includes Go-Karts</p>
+<p class="text-gray-500 font-semibold text-sm flex-grow">All Day Play, plus unlimited laps.</p>
+<a href="https://store.unleashedbrands.com/urban-air/westlake-oh/purchase/ticket" target="_blank" rel="noopener" class="block text-center w-full max-w-[240px] bg-uaPink text-white font-bold py-3.5 rounded-ua-pill uppercase tracking-wider border-[3px] border-uaPink hover:bg-white hover:text-uaPink hover:scale-[1.04] transition-all mt-6">Select Pass</a>
+</div>
+<!-- Legacy tiers (older pricing model locations) -->
+<div class="ticket-cell lg-only flex flex-col items-center text-center px-8 py-10">
+<h3 class="text-[26px] font-black uppercase tracking-tight text-uaCharcoal leading-none">Deluxe</h3>
+<span class="block w-10 h-1 bg-uaPink rounded-full mt-2.5 mb-7"></span>
+<div class="h-[100px] flex items-center justify-center mb-2">
+<span class="text-uaPink font-black text-7xl leading-none whitespace-nowrap" data-purpose="price">$19<span class="ua-cents">99</span></span>
+</div>
+<p class="text-uaCharcoal font-extrabold text-xl uppercase mb-3">Classic Thrills</p>
+<p class="text-uaPink font-bold text-xs uppercase tracking-wider mb-2">Includes:</p>
+<ul class="text-gray-600 font-semibold text-sm leading-relaxed flex-grow">
+<li>APEX Trampolines</li>
+<li>Ultimate Dodgeball</li>
+<li>Battle Beam</li>
+<li>Tubes Playground</li>
+<li>Runway (Tumble Track)</li>
+<li>Kids Area 7 &amp; Under</li>
+</ul>
+<a href="https://store.unleashedbrands.com/urban-air/westlake-oh/purchase/ticket" target="_blank" rel="noopener" class="block text-center w-full max-w-[240px] border-[3px] border-uaPink text-uaPink font-bold py-3.5 rounded-ua-pill uppercase tracking-wider hover:bg-uaPink hover:text-white transition-all mt-6">Select Pass</a>
+</div>
+<div class="ticket-cell lg-only flex flex-col items-center text-center px-8 py-10 border-l-2 border-[#fdeaf5]">
+<h3 class="text-[26px] font-black uppercase tracking-tight text-uaCharcoal leading-none">Ultimate</h3>
+<span class="block w-10 h-1 bg-uaPink rounded-full mt-2.5 mb-7"></span>
+<div class="h-[100px] flex items-center justify-center mb-2">
+<span class="text-uaPink font-black text-7xl leading-none whitespace-nowrap" data-purpose="price">$23<span class="ua-cents">99</span></span>
+</div>
+<p class="text-uaCharcoal font-extrabold text-xl uppercase mb-3">More Adventure</p>
+<p class="text-uaPink font-bold text-xs uppercase tracking-wider mb-2">Everything in Deluxe, plus:</p>
+<ul class="text-gray-600 font-semibold text-sm leading-relaxed flex-grow">
+<li>Climbing Walls</li>
+<li>Warrior Course</li>
+<li>Ropes Course</li>
+<li>Tube Slides</li>
+<li>Leap of Faith</li>
+</ul>
+<a href="https://store.unleashedbrands.com/urban-air/westlake-oh/purchase/ticket" target="_blank" rel="noopener" class="block text-center w-full max-w-[240px] border-[3px] border-uaPink text-uaPink font-bold py-3.5 rounded-ua-pill uppercase tracking-wider hover:bg-uaPink hover:text-white transition-all mt-6">Select Pass</a>
+</div>
+<div class="ticket-cell lg-only flex flex-col items-center text-center px-8 py-10 border-l-2 border-[#fdeaf5]">
+<h3 class="text-[26px] font-black uppercase tracking-tight text-uaCharcoal leading-none">Platinum</h3>
+<span class="block w-10 h-1 bg-uaPink rounded-full mt-2.5 mb-7"></span>
+<div class="h-[100px] flex items-center justify-center mb-2">
+<span class="text-uaPink font-black text-7xl leading-none whitespace-nowrap" data-purpose="price">$29<span class="ua-cents">99</span></span>
+</div>
+<p class="text-uaCharcoal font-extrabold text-xl uppercase mb-3">Every Attraction</p>
+<p class="text-uaPink font-bold text-xs uppercase tracking-wider mb-2">Everything in Ultimate and Deluxe, plus:</p>
+<ul class="text-gray-600 font-semibold text-sm leading-relaxed flex-grow">
+<li>Go-Kart Tracks</li>
+<li>Sky Rider</li>
+<li>Spin Zone Bumper Cars</li>
+<li>Virtual Reality</li>
+</ul>
+<a href="https://store.unleashedbrands.com/urban-air/westlake-oh/purchase/ticket" target="_blank" rel="noopener" class="block text-center w-full max-w-[240px] bg-uaPink text-white font-bold py-3.5 rounded-ua-pill uppercase tracking-wider border-[3px] border-uaPink hover:bg-white hover:text-uaPink hover:scale-[1.04] transition-all mt-6">Select Pass</a>
+</div>
+</div>
+</div>
+<!-- Ticket add-on pricing -->
+<div class="addon-grid" data-purpose="ticket-addons">
+<div class="bg-white rounded-ua-card shadow-ua border-b-4 border-uaPink px-6 h-[112px] flex items-center gap-4">
+<div class="flex-grow min-w-0">
+<h4 class="font-extrabold text-base uppercase leading-tight text-uaCharcoal">Shorty 40&Prime;</h4>
+<p class="text-xs font-semibold text-gray-500">For children 40&Prime; &amp; under.</p>
+</div>
+<span class="text-uaPink font-black text-3xl leading-none whitespace-nowrap flex-shrink-0">$14<span class="ua-cents">99</span></span>
+</div>
+<div class="bg-white rounded-ua-card shadow-ua border-b-4 border-uaPink px-6 h-[112px] flex items-center gap-4">
+<div class="flex-grow min-w-0">
+<h4 class="font-extrabold text-base uppercase leading-tight text-uaCharcoal">Parent Ticket</h4>
+<p class="text-xs font-semibold text-gray-500">With purchase of a child&rsquo;s pass.</p>
+</div>
+<span class="text-uaPink font-black text-3xl leading-none whitespace-nowrap flex-shrink-0">$14<span class="ua-cents">99</span></span>
+</div>
+<div class="addon-wide bg-white rounded-ua-card shadow-ua border-b-4 border-uaPink px-6 h-[112px] flex items-center gap-4">
+<div class="flex-grow min-w-0">
+<h4 class="font-extrabold text-base uppercase leading-tight text-uaCharcoal">Urban Air Socks</h4>
+<p class="text-xs font-semibold text-gray-500">Urban Air Socks are required.</p>
+</div>
+<span class="text-uaPink font-black text-3xl leading-none whitespace-nowrap flex-shrink-0">$3<span class="ua-cents">99</span></span>
+</div>
+</div>
+</div>
+<!-- Membership column -->
+<div class="flex flex-col gap-5">
+<div class="panel-card relative bg-uaPink rounded-ua-card shadow-ua overflow-hidden flex-grow" data-purpose="membership-panel">
+<div class="relative flex flex-col items-center text-center px-8 py-10 h-full">
+<div class="ua-halftone absolute inset-0 pointer-events-none"></div>
+<h3 class="relative text-[26px] font-black uppercase tracking-tight text-uaYellow leading-none">Monthly Membership</h3>
+<span class="relative block w-10 h-1 bg-uaYellow rounded-full mt-2.5 mb-7"></span>
+<div class="relative h-[100px] flex items-center justify-center gap-4 mb-2">
+<span class="text-uaYellow font-black text-7xl leading-none whitespace-nowrap" data-purpose="price">$19<span class="ua-cents">99</span><span class="text-2xl font-extrabold">/mo</span></span>
+<div class="half-badge relative w-[100px] h-[100px] text-white flex flex-col items-center justify-center text-center flex-shrink-0">
+<svg class="absolute inset-0 w-full h-full" viewBox="0 0 100 100" fill="none" aria-hidden="true">
+<path d="M 50 8 A 42 42 0 0 1 50 92" stroke="#e0e621" stroke-width="3"></path>
+<path d="M 50 92 A 42 42 0 0 1 50 8" stroke="#e0e621" stroke-width="3"></path>
+<polygon points="53,86 53,98 41,92" fill="#e0e621"></polygon>
+<polygon points="47,2 47,14 59,8" fill="#e0e621"></polygon>
+</svg>
+<span class="font-black text-base leading-none">HALF</span>
+<span class="font-bold text-[9px] leading-tight px-3">the cost of<br/><span class="gk-on-text">Unlimited&nbsp;Play&nbsp;+</span><span class="gk-off-text">Unlimited&nbsp;Play</span></span>
+</div>
+</div>
+<p class="relative text-white font-extrabold text-xl uppercase mb-1.5"><span class="gk-on-text">Unlimited Visits, Go-Karts Included!</span><span class="gk-off-text">Unlimited Visits, Every Month!</span></p>
+<p class="relative text-white/85 font-semibold text-sm flex-grow">Plus member pricing on everything below.</p>
+<a href="https://store.unleashedbrands.com/urban-air/westlake-oh/purchase/membership" target="_blank" rel="noopener" class="relative block text-center w-full max-w-[240px] bg-uaYellow text-uaCharcoal font-bold py-3.5 rounded-ua-pill uppercase tracking-wider border-[3px] border-uaYellow hover:bg-white hover:border-white hover:text-uaPink hover:scale-[1.04] transition-all mt-6">Join Now</a>
+</div>
+</div>
+<!-- Member add-on pricing -->
+<div class="addon-grid" data-purpose="member-addons">
+<div class="bg-uaPink rounded-ua-card shadow-ua px-6 h-[112px] flex items-center gap-4">
+<div class="flex-grow min-w-0">
+<h4 class="font-extrabold text-base uppercase leading-tight text-white">Shorty 40&Prime;</h4>
+<p class="text-xs font-semibold text-white/85">For children 40&Prime; &amp; under.</p>
+</div>
+<span class="text-uaYellow font-black text-3xl leading-none whitespace-nowrap flex-shrink-0">$9<span class="ua-cents">99</span></span>
+</div>
+<div class="bg-uaPink rounded-ua-card shadow-ua px-6 h-[112px] flex items-center gap-4">
+<div class="flex-grow min-w-0">
+<h4 class="font-extrabold text-base uppercase leading-tight text-white">Parent Membership</h4>
+<p class="text-xs font-semibold text-white/85">With purchase of a child&rsquo;s pass.</p>
+</div>
+<span class="text-uaYellow font-black text-3xl leading-none whitespace-nowrap flex-shrink-0">$9<span class="ua-cents">99</span></span>
+</div>
+<div class="addon-wide bg-uaPink rounded-ua-card shadow-ua px-6 h-[112px] flex items-center gap-4">
+<div class="flex-grow min-w-0">
+<h4 class="font-extrabold text-base uppercase leading-tight text-white">Urban Air Socks</h4>
+<p class="text-xs font-semibold text-white/85">Included on the initial visit.</p>
+</div>
+<span class="text-uaYellow font-black text-3xl leading-none whitespace-nowrap flex-shrink-0">FREE</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Fine print -->
+<p class="text-[11px] leading-relaxed text-gray-400 text-center max-w-4xl mx-auto mt-10">*Prices shown are placeholders &mdash; live values come from the location pricing feed. Shorty 40 access level is dependent upon the child&rsquo;s attraction eligibility. Parent Ticket: 50% off retail with purchase of a full-price child&rsquo;s pass; must match the child&rsquo;s attraction level. Urban Air Socks are required. Membership includes one pair of Urban Air Socks on the initial visit only. Prices do not include tax. Offers and pricing not valid for parties, groups, or special events.</p>
+</div>
+</section>
+<!-- END: Pricing Section -->
+<!-- BEGIN: Attractions Gallery -->
+<section class="max-w-7xl mx-auto px-6 py-16" data-purpose="attractions-gallery" data-screen-label="Attractions Gallery">
+<div class="text-center mb-10">
+<p class="text-uaPink font-extrabold uppercase tracking-[0.25em] text-sm mb-3">Experience the Thrill</p>
+<h2 class="text-5xl font-black uppercase tracking-tight text-uaCharcoal">Attractions Gallery</h2>
+</div>
+<div class="gallery-grid grid grid-cols-2 md:grid-cols-4 gap-6">
+<!-- Featured: Go-Kart Tracks (2x2, hidden when Go-Karts unavailable) -->
+<div class="attraction-card featured-card gk-only relative overflow-hidden rounded-ua-card shadow-md">
+<img alt="Go-Kart Tracks" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2018/03/go-karts-1600x900-1-1080x675.jpg"/>
+<div class="absolute top-5 left-5 z-10">
+<span class="bg-uaPink text-white font-black text-xs px-4 py-1.5 rounded-ua-pill uppercase tracking-wider shadow-md">Featured</span>
+</div>
+<div class="absolute bottom-5 left-5 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-base px-5 py-2 rounded-ua-pill uppercase">Go-Kart Tracks</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-10 text-center text-white">
+<p class="text-lg mb-5 font-semibold max-w-md">Put your driving skills to the test and race to the finish with our indoor Go-Karts.</p>
+<a class="text-uaYellow font-bold uppercase text-sm hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/go-karts/">Learn More</a>
+</div>
+</div>
+<!-- Sky Rider -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Sky Rider" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/sky-rider-2-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Sky Rider</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Take your fun to exhilarating new heights with our Sky Rider.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/sky-rider-indoor-zipline/">Learn More</a>
+</div>
+</div>
+<!-- Warrior Course -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Warrior Course" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/warrior-course-4-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Warrior Course</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Jump, bounce, and hold on tight! Do you have what it takes to complete the Warrior Course?</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/warrior-obstacle-course/">Learn More</a>
+</div>
+</div>
+<!-- Climbing Walls -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Climbing Walls" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/climbing-walls-6-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Climbing Walls</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Build confidence and reach new heights on our climbing walls.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/indoor-climbing-walls/">Learn More</a>
+</div>
+</div>
+<!-- Wipeout -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Wipeout" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/wipeout-7-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Wipeout</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">The mission is simple: be the last person standing in this fun and hilarious competition.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/wipeout/">Learn More</a>
+</div>
+</div>
+<!-- Battle Beam -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Battle Beam" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/battle-beam-14-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Battle Beam</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Balance and friendly competition combined with a foam pit to catch your fall.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/warrior-battle-beam/">Learn More</a>
+</div>
+</div>
+<!-- Runway (Tumble Track) -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Runway (Tumble Track)" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/Trampoline-Runway-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Runway (Tumble Track)</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Calling all gymnasts, dancers, cheerleaders, and aspiring ninjas: it’s tumble time!</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/the-runway/">Learn More</a>
+</div>
+</div>
+<!-- Virtual Reality -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Virtual Reality" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2018/03/VR-Girl-BG_3-NoVRLogo-1600x900-1-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Virtual Reality</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Gather your friends and prepare for an adventure in an all-new reality!</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/virtual-reality/">Learn More</a>
+</div>
+</div>
+<!-- Spin Zone Bumper Cars -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Spin Zone Bumper Cars" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/spin-zone-bumper-cars-31-1080x675.png"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Spin Zone Bumper Cars</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Hit and runs have never been so fun. See for yourself in our Spin Zone Bumper Cars.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/spin-zone-bumper-cars/">Learn More</a>
+</div>
+</div>
+<!-- Dodgeball -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Dodgeball" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/dodgeball-33-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Dodgeball</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Ready. Set. Dodgeball! Plus trampolines? Yes, please.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/ultimate-dodgeball/">Learn More</a>
+</div>
+</div>
+<!-- Leap of Faith -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Leap of Faith" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/leap-of-faith-10-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Leap of Faith</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Build up your courage, climb to the top of the platform, take a deep breath and leap!</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/leap-of-faith/">Learn More</a>
+</div>
+</div>
+<!-- DropZone -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="DropZone" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/dropzone-3-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">DropZone</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Practice your leaps, spins, and acrobatics, and land on a giant, inflatable airbag.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/dropzone/">Learn More</a>
+</div>
+</div>
+<!-- Slam Dunk Zone -->
+<div class="attraction-card relative h-64 overflow-hidden rounded-ua-card shadow-md">
+<img alt="Slam Dunk Zone" class="w-full h-full object-cover" src="https://www.urbanair.com/wp-content/uploads/2021/09/slam-dunk-zone-12-1080x675.jpg"/>
+<div class="absolute bottom-4 left-4 z-10">
+<span class="bg-uaYellow text-uaCharcoal font-black text-xs px-3 py-1 rounded-ua-pill uppercase">Slam Dunk Zone</span>
+</div>
+<div class="attraction-overlay absolute inset-0 flex flex-col justify-center items-center p-6 text-center text-white">
+<p class="text-sm mb-4 font-semibold">Catch some big air and win all the points in our Slam Dunk Zone.</p>
+<a class="text-uaYellow font-bold uppercase text-xs hover:underline" target="_blank" rel="noopener" href="https://www.urbanair.com/attractions/slam-dunk-zone/">Learn More</a>
+</div>
+</div>
+</div>
+<div class="mt-12 text-center">
+<a href="https://www.urbanair.com/attractions/" target="_blank" rel="noopener" class="inline-block bg-uaPink text-white font-bold py-3.5 px-12 rounded-ua-pill uppercase tracking-widest hover:bg-uaYellow hover:text-uaCharcoal hover:scale-[1.04] transition-all shadow-ua">View All Attractions</a>
+</div>
+</section>
+<!-- END: Attractions Gallery -->
+</main>
+<!-- END: Main Page Content -->
+<!-- Tweaks panel (host-toggled; hidden when Tweaks is off) -->
+<div id="tweaks-root"></div>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel">
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "model": "legacy",
+    "addons": "2wide",
+    "gokarts": true,
+    "halfBadge": true
+  }/*EDITMODE-END*/;
+
+  function TweaksApp() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+
+    React.useEffect(() => {
+      const root = document.documentElement;
+      root.setAttribute('data-model', t.model);
+      root.setAttribute('data-addons', t.addons);
+      root.setAttribute('data-gokarts', t.gokarts ? 'on' : 'off');
+      root.setAttribute('data-half', t.halfBadge ? 'on' : 'off');
+    }, [t.model, t.addons, t.gokarts, t.halfBadge]);
+
+    return (
+      <TweaksPanel>
+        <TweakSection label="Pricing section" />
+        <TweakRadio label="Pricing model" value={t.model}
+                    options={[{ value: 'simplified', label: 'Simplified' }, { value: 'legacy', label: 'Legacy tiers' }]}
+                    onChange={(v) => setTweak('model', v)} />
+        <TweakRadio label="Add-on boxes" value={t.addons}
+                    options={[{ value: '2wide', label: '2 + wide' }, { value: 'stacked', label: 'Stacked' }]}
+                    onChange={(v) => setTweak('addons', v)} />
+        <TweakToggle label='"HALF the cost" badge' value={t.halfBadge}
+                     onChange={(v) => setTweak('halfBadge', v)} />
+        <TweakSection label="Location" />
+        <TweakToggle label="Go-Karts available" value={t.gokarts}
+                     onChange={(v) => setTweak('gokarts', v)} />
+      </TweaksPanel>
+    );
+  }
+
+  ReactDOM.createRoot(document.getElementById('tweaks-root')).render(<TweaksApp />);
+</script>
+</body>
+</html>
