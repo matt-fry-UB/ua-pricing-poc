@@ -1,10 +1,17 @@
 // GET /api/sp-locations
 // Returns names of Urban Air locations currently on simplified pricing,
-// determined by checking each park's membership products against the upstream API.
-// Simplified = has memberships but none named Deluxe/Ultimate/Platinum.
-// Cached for 1 hour; only the first cold call per hour hits the upstream API.
+// using the same detectPricingModel logic as /api/location (ticket-based).
+// Cached for 1 hour; the parallel upstream calls only happen on cache miss.
 
-const { API, BRAND_ID, loadParks } = require('./_shared');
+const {
+  API,
+  BRAND_ID,
+  loadParks,
+  findLimitId,
+  detectPricingModel,
+  IS_SECONDARY,
+  HIDE_PRODUCT,
+} = require('./_shared');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -15,18 +22,20 @@ module.exports = async function handler(req, res) {
 
     const results = await Promise.allSettled(
       parks.map(async park => {
-        const resp = await fetch(
-          `${API}/brands/${BRAND_ID}/parks/${park.id}/products?productTypeIds=1`
+        const { limitId, date } = await findLimitId(park.id);
+        if (!limitId) return null;
+
+        const json = await fetch(
+          `${API}/brands/${BRAND_ID}/parks/${park.id}/products` +
+          `?productTypeIds=2&date=${date}&parkAttendanceLimitId=${limitId}`
+        ).then(r => r.json());
+
+        const allTickets    = json.data || [];
+        const primaryTickets = allTickets.filter(
+          t => !IS_SECONDARY(t.parkProductName) && !HIDE_PRODUCT(t.parkProductName)
         );
-        if (!resp.ok) return null;
-        const json = await resp.json();
-        const memberships = json.data || [];
-        // Simplified locations always have an "Unlimited Play" membership;
-        // legacy locations use Deluxe/Ultimate/Platinum naming and never have one
-        const isSimplified = memberships.some(m =>
-          /\bunlimited play\b/i.test(m.parkProductName)
-        );
-        return isSimplified ? park.name : null;
+        const model = detectPricingModel(primaryTickets);
+        return model === 'simplified' ? park.name : null;
       })
     );
 
