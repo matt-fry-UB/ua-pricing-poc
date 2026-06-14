@@ -1,34 +1,38 @@
 // GET /api/sp-locations
-// Returns location names from the UA Simplified Pricing QA Checklist (parent rows only).
-// Requires SMARTSHEET_ACCESS_TOKEN env var.
+// Returns names of Urban Air locations currently on simplified pricing,
+// determined by checking each park's membership products against the upstream API.
+// Simplified = has memberships but none named Deluxe/Ultimate/Platinum.
+// Cached for 1 hour; only the first cold call per hour hits the upstream API.
 
-const QA_SHEET_ID  = '3089334252031876';
-const TASK_COL_ID  = '3847554830995332'; // primary "Location Name" column (QA_COL["task"])
+const { API, BRAND_ID, loadParks } = require('./_shared');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=600');
-
-  const token = process.env.SMARTSHEET_ACCESS_TOKEN;
-  if (!token) {
-    return res.status(503).json({ error: 'SMARTSHEET_ACCESS_TOKEN not configured' });
-  }
+  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200');
 
   try {
-    const ssResp = await fetch(
-      `https://api.smartsheet.com/2.0/sheets/${QA_SHEET_ID}?columnIds=${TASK_COL_ID}`,
-      { headers: { Authorization: `Bearer ${token}`, Accept: 'application/json' } }
-    );
-    if (!ssResp.ok) {
-      const text = await ssResp.text();
-      return res.status(502).json({ error: `Smartsheet API ${ssResp.status}: ${text.slice(0, 200)}` });
-    }
-    const sheet = await ssResp.json();
+    const parks = await loadParks();
 
-    const names = (sheet.rows || [])
-      .filter(r => !r.parentId)
-      .map(r => r.cells?.[0]?.value)
-      .filter(Boolean)
+    const results = await Promise.allSettled(
+      parks.map(async park => {
+        const resp = await fetch(
+          `${API}/brands/${BRAND_ID}/parks/${park.id}/products?productTypeIds=1`
+        );
+        if (!resp.ok) return null;
+        const json = await resp.json();
+        const memberships = json.data || [];
+        // Legacy locations have Deluxe/Ultimate/Platinum memberships
+        const isLegacy = memberships.some(m =>
+          /\b(deluxe|ultimate|platinum)\b/i.test(m.parkProductName)
+        );
+        // Require at least one membership to confirm the park is active/configured
+        return memberships.length > 0 && !isLegacy ? park.name : null;
+      })
+    );
+
+    const names = results
+      .filter(r => r.status === 'fulfilled' && r.value)
+      .map(r => r.value)
       .sort((a, b) => {
         const [cA, stA = ''] = a.split(',').map(s => s.trim());
         const [cB, stB = ''] = b.split(',').map(s => s.trim());
