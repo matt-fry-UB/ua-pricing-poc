@@ -70,12 +70,14 @@ def fmt_list(items):
     return ", ".join(str(i) for i in sorted(items))
 
 
-def round_price(v):
-    """Round to 2dp using half-up (handles fractional ref values like 14.985 -> 14.99)."""
+def _to_cents(s):
+    """Convert a stripped price string to integer cents using Decimal arithmetic.
+    Handles fractional ref values (e.g. "14.985" -> 1499 == $14.99).
+    Returns None if s is not a valid number."""
     try:
-        return float(
-            decimal.Decimal(str(v)).quantize(
-                decimal.Decimal("0.01"), rounding=decimal.ROUND_HALF_UP
+        return int(
+            (decimal.Decimal(s) * 100).quantize(
+                decimal.Decimal("1"), rounding=decimal.ROUND_HALF_UP
             )
         )
     except Exception:
@@ -83,13 +85,15 @@ def round_price(v):
 
 
 def norm_for_compare(v):
-    """Normalise a value for comparison: strip $, round prices to 2dp, lowercase text."""
-    if v is None or v == "":
+    """Normalise for comparison.
+    Prices (any of $75, $75.00, 75, 75.0, 75.00) all become integer cents (7500).
+    Non-numeric values become lowercase strings."""
+    if v is None or str(v).strip() == "":
         return None
-    s = str(v).replace("$", "").strip()
-    rounded = round_price(s)
-    if rounded is not None:
-        return rounded
+    s = str(v).replace("$", "").replace(",", "").strip()
+    cents = _to_cents(s)
+    if cents is not None:
+        return cents
     return s.lower()
 
 
