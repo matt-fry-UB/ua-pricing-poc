@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UA Pricing QA Tools</title>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&family=Oswald:wght@600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --black:   #111218;
+      --yellow:  #FFD100;
+      --bg:      #F5F4F0;
+      --white:   #FFFFFF;
+      --g100:    #F3F4F6;
+      --g200:    #E5E7EB;
+      --g300:    #D1D5DB;
+      --g400:    #9CA3AF;
+      --g500:    #6B7280;
+      --g700:    #374151;
+      --success: #059669;
+      --error:   #DC2626;
+      --warn:    #D97706;
+    }
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      background: var(--bg);
+      color: var(--black);
+      min-height: 100vh;
+    }
+    header {
+      background: var(--black);
+      color: var(--white);
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    header .logo {
+      font-family: 'Oswald', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--yellow);
+      letter-spacing: 1px;
+    }
+    header .subtitle {
+      font-size: 14px;
+      color: var(--g400);
+    }
+    main {
+      max-width: 900px;
+      margin: 32px auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+    .card {
+      background: var(--white);
+      border-radius: 12px;
+      padding: 28px 32px;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 2px 8px rgba(0,0,0,.07);
+    }
+    .card h2 {
+      font-family: 'Oswald', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+    .card .desc {
+      font-size: 14px;
+      color: var(--g500);
+      margin-bottom: 20px;
+      line-height: 1.55;
+    }
+    .last-run {
+      font-size: 13px;
+      color: var(--g400);
+      margin-bottom: 18px;
+    }
+    .last-run .run-status {
+      font-weight: 600;
+    }
+    .last-run .run-status.success { color: var(--success); }
+    .last-run .run-status.failure { color: var(--error); }
+    .last-run .run-status.running { color: var(--warn); }
+
+    /* Location checkboxes */
+    .loc-controls {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .btn-sm {
+      font: 600 12px 'Nunito Sans', sans-serif;
+      padding: 5px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--g300);
+      background: var(--g100);
+      color: var(--g700);
+      cursor: pointer;
+    }
+    .btn-sm:hover { background: var(--g200); }
+    .loc-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 6px 16px;
+      max-height: 260px;
+      overflow-y: auto;
+      border: 1px solid var(--g200);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      background: var(--g100);
+    }
+    .loc-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      color: var(--g700);
+      cursor: pointer;
+      user-select: none;
+    }
+    .loc-item input[type="checkbox"] {
+      accent-color: var(--black);
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
+    }
+    .loc-loading {
+      font-size: 13px;
+      color: var(--g400);
+      padding: 8px 0;
+    }
+
+    /* Dry run toggle */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 20px;
+      font-size: 14px;
+      color: var(--g700);
+    }
+    .toggle-row input[type="checkbox"] {
+      accent-color: var(--black);
+      width: 16px;
+      height: 16px;
+    }
+    .dry-run-note {
+      font-size: 12px;
+      color: var(--g400);
+    }
+
+    /* Buttons */
+    .btn-primary {
+      font: 700 14px 'Nunito Sans', sans-serif;
+      padding: 12px 28px;
+      border-radius: 8px;
+      border: none;
+      background: var(--black);
+      color: var(--yellow);
+      cursor: pointer;
+      letter-spacing: .3px;
+      transition: opacity .15s;
+    }
+    .btn-primary:hover { opacity: .85; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+    /* Status log */
+    #status-log {
+      background: var(--black);
+      color: #d4f7da;
+      font: 13px/1.6 ui-monospace, 'Courier New', monospace;
+      border-radius: 8px;
+      padding: 16px 20px;
+      max-height: 220px;
+      overflow-y: auto;
+      display: none;
+    }
+    #status-log.visible { display: block; }
+    .log-line { white-space: pre-wrap; }
+    .log-line.err { color: #fca5a5; }
+    .log-line.warn { color: #fde68a; }
+    .log-line.ok { color: #6ee7b7; }
+
+    .divider {
+      border: none;
+      border-top: 1px solid var(--g200);
+      margin: 4px 0 20px;
+    }
+
+    /* Warning banner if PAT not set */
+    .pat-warning {
+      background: #fef3c7;
+      border: 1px solid #fcd34d;
+      border-radius: 8px;
+      padding: 12px 16px;
+      font-size: 13px;
+      color: #92400e;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <span class="logo">URBAN AIR</span>
+    <span class="subtitle">Simplified Pricing QA Tools</span>
+  </header>
+
+  <main>
+    <div id="pat-warning" class="pat-warning" style="display:none">
+      GitHub token not configured. Open this file in a text editor and replace
+      <code>REPLACE_WITH_YOUR_PAT</code> with a GitHub personal access token
+      that has the <strong>workflow</strong> scope.
+    </div>
+
+    <!-- ── Card 1: Sync Smartsheet ── -->
+    <div class="card">
+      <h2>Sync Smartsheet</h2>
+      <p class="desc">
+        Pulls the latest reference values from the Simplified Pricing Rollout sheet and
+        Birthday Grid, then updates the QA Checklist rows. Run this when source data changes
+        (new locations, price corrections). Does not touch the Command Center or Website columns.
+      </p>
+      <div id="sync-last-run" class="last-run">Last run: checking...</div>
+      <hr class="divider" />
+      <div class="toggle-row">
+        <input type="checkbox" id="sync-execute" />
+        <label for="sync-execute">Write changes to Smartsheet</label>
+        <span class="dry-run-note">(leave unchecked to preview without writing)</span>
+      </div>
+      <button id="sync-btn" class="btn-primary" onclick="runSync()">Sync Smartsheet</button>
+    </div>
+
+    <!-- ── Card 2: Run Pricing QA ── -->
+    <div class="card">
+      <h2>Run Pricing QA</h2>
+      <p class="desc">
+        Fetches live pricing from the Command Center API and the Urban Air website for
+        each selected location, compares against the reference values, and writes results
+        to the Command Center, Website, and Mismatch columns in the QA Checklist.
+      </p>
+      <div id="qa-last-run" class="last-run">Last run: checking...</div>
+      <hr class="divider" />
+
+      <div class="loc-controls">
+        <button class="btn-sm" onclick="selectAll()">Select All</button>
+        <button class="btn-sm" onclick="clearAll()">Clear All</button>
+        <span id="sel-count" style="font-size:13px;color:var(--g500);align-self:center;margin-left:4px;"></span>
+      </div>
+      <div id="loc-grid" class="loc-grid">
+        <span class="loc-loading">Loading locations...</span>
+      </div>
+
+      <div class="toggle-row">
+        <input type="checkbox" id="qa-execute" />
+        <label for="qa-execute">Write results to Smartsheet</label>
+        <span class="dry-run-note">(leave unchecked to dry run)</span>
+      </div>
+      <button id="qa-btn" class="btn-primary" onclick="runQA()">Run Pricing QA</button>
+    </div>
+
+    <!-- ── Status log ── -->
+    <div id="status-log"></div>
+  </main>
+
+  <script>
+    // ============================================================
+    // CONFIG — replace GITHUB_TOKEN with a PAT (workflow scope)
+    // ============================================================
+    const CFG = {
+      GITHUB_TOKEN: 'REPLACE_WITH_YOUR_PAT',
+      REPO:         'matt-fry-UB/ua-pricing-poc',
+      BRANCH:       'main',
+      CC_API:       'https://ua-pricing-poc.vercel.app/api',
+      SYNC_WF:      'pricing-sync.yml',
+      QA_WF:        'pricing-qa.yml',
+    };
+
+    // ============================================================
+    // Startup
+    // ============================================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      if (CFG.GITHUB_TOKEN === 'REPLACE_WITH_YOUR_PAT') {
+        document.getElementById('pat-warning').style.display = 'block';
+      }
+      loadLocations();
+      refreshLastRun('sync');
+      refreshLastRun('qa');
+    });
+
+    // ============================================================
+    // Location checkboxes
+    // ============================================================
+    async function loadLocations() {
+      try {
+        const resp = await fetch(`${CFG.CC_API}/locations`);
+        const locs = await resp.json();
+        renderLocations(locs);
+      } catch(e) {
+        document.getElementById('loc-grid').innerHTML =
+          '<span class="loc-loading" style="color:var(--error)">Failed to load locations. ' + e.message + '</span>';
+      }
+    }
+
+    function renderLocations(locs) {
+      const grid = document.getElementById('loc-grid');
+      if (!locs || !locs.length) {
+        grid.innerHTML = '<span class="loc-loading">No locations found.</span>';
+        return;
+      }
+      grid.innerHTML = locs.map(loc => `
+        <label class="loc-item">
+          <input type="checkbox" value="${escHtml(loc.slug)}" onchange="updateSelCount()" />
+          ${escHtml(loc.name || loc.slug)}
+        </label>
+      `).join('');
+      updateSelCount();
+    }
+
+    function selectAll() {
+      document.querySelectorAll('#loc-grid input[type=checkbox]').forEach(c => c.checked = true);
+      updateSelCount();
+    }
+    function clearAll() {
+      document.querySelectorAll('#loc-grid input[type=checkbox]').forEach(c => c.checked = false);
+      updateSelCount();
+    }
+    function updateSelCount() {
+      const total = document.querySelectorAll('#loc-grid input[type=checkbox]').length;
+      const sel = document.querySelectorAll('#loc-grid input[type=checkbox]:checked').length;
+      document.getElementById('sel-count').textContent = sel === total
+        ? `All ${total} selected`
+        : `${sel} of ${total} selected`;
+    }
+    function selectedSlugs() {
+      return Array.from(document.querySelectorAll('#loc-grid input[type=checkbox]:checked'))
+        .map(c => c.value);
+    }
+
+    // ============================================================
+    // Last-run timestamps
+    // ============================================================
+    async function refreshLastRun(tool) {
+      const wf    = tool === 'sync' ? CFG.SYNC_WF : CFG.QA_WF;
+      const elId  = tool === 'sync' ? 'sync-last-run' : 'qa-last-run';
+      const el    = document.getElementById(elId);
+      try {
+        const runs = await ghGet(`actions/workflows/${wf}/runs?per_page=1`);
+        const run  = runs.workflow_runs?.[0];
+        if (!run) { el.textContent = 'Last run: never'; return; }
+        const when     = new Date(run.created_at).toLocaleString();
+        const statusCls = run.conclusion === 'success' ? 'success'
+                        : run.conclusion === 'failure' ? 'failure'
+                        : 'running';
+        const label    = run.conclusion || run.status;
+        el.innerHTML   = `Last run: ${when} -- <span class="run-status ${statusCls}">${label}</span>
+          <a href="${run.html_url}" target="_blank" style="font-size:12px;color:var(--g400);margin-left:6px;">[view log]</a>`;
+      } catch(e) {
+        el.textContent = 'Last run: unavailable';
+      }
+    }
+
+    // ============================================================
+    // Trigger: Sync
+    // ============================================================
+    async function runSync() {
+      const execute = document.getElementById('sync-execute').checked;
+      const btn = document.getElementById('sync-btn');
+      btn.disabled = true;
+      log('clear');
+      log(`Triggering Sync Smartsheet workflow${execute ? '' : ' (dry run)'}...`);
+      const ok = await triggerWorkflow(CFG.SYNC_WF, { execute: String(execute) });
+      if (!ok) { btn.disabled = false; return; }
+      await monitorRun(CFG.SYNC_WF, btn, () => refreshLastRun('sync'));
+    }
+
+    // ============================================================
+    // Trigger: QA
+    // ============================================================
+    async function runQA() {
+      const slugs   = selectedSlugs();
+      const execute = document.getElementById('qa-execute').checked;
+      const btn     = document.getElementById('qa-btn');
+
+      if (!slugs.length) {
+        log('clear');
+        log('warn: No locations selected. Please check at least one location.');
+        return;
+      }
+
+      btn.disabled = true;
+      log('clear');
+      const locStr = slugs.join(',');
+      log(`Triggering Pricing QA for ${slugs.length} location(s)${execute ? '' : ' (dry run)'}...`);
+      log(`  Locations: ${locStr}`);
+      const ok = await triggerWorkflow(CFG.QA_WF, { locations: locStr, execute: String(execute) });
+      if (!ok) { btn.disabled = false; return; }
+      await monitorRun(CFG.QA_WF, btn, () => refreshLastRun('qa'));
+    }
+
+    // ============================================================
+    // Workflow dispatch + polling
+    // ============================================================
+    async function triggerWorkflow(workflowFile, inputs) {
+      try {
+        const resp = await fetch(
+          `https://api.github.com/repos/${CFG.REPO}/actions/workflows/${workflowFile}/dispatches`,
+          {
+            method: 'POST',
+            headers: ghHeaders(),
+            body: JSON.stringify({ ref: CFG.BRANCH, inputs }),
+          }
+        );
+        if (resp.status === 204) {
+          log('ok: Workflow triggered. Waiting for run to start...');
+          return true;
+        }
+        const body = await resp.text();
+        log(`err: GitHub returned ${resp.status}: ${body.slice(0,200)}`);
+        return false;
+      } catch(e) {
+        log(`err: Failed to trigger workflow: ${e.message}`);
+        return false;
+      }
+    }
+
+    async function monitorRun(workflowFile, btn, onComplete) {
+      // Wait a moment, then find the newly created run
+      await sleep(4000);
+      const since = new Date(Date.now() - 30000).toISOString();
+      let runId = null;
+
+      for (let attempt = 0; attempt < 8; attempt++) {
+        try {
+          const data = await ghGet(`actions/workflows/${workflowFile}/runs?per_page=5`);
+          const run = (data.workflow_runs || []).find(r => r.created_at > since);
+          if (run) { runId = run.id; break; }
+        } catch(e) { /* retry */ }
+        await sleep(3000);
+      }
+
+      if (!runId) {
+        log('warn: Could not locate the triggered run. Check GitHub Actions manually.');
+        btn.disabled = false;
+        return;
+      }
+
+      log(`ok: Run started (id ${runId}). Polling for completion...`);
+
+      // Poll until done (max 20 minutes)
+      let status = '';
+      for (let i = 0; i < 80; i++) {
+        await sleep(15000);
+        try {
+          const run = await ghGet(`actions/runs/${runId}`);
+          const newStatus = run.status + (run.conclusion ? ' / ' + run.conclusion : '');
+          if (newStatus !== status) {
+            status = newStatus;
+            const cls = run.conclusion === 'success' ? 'ok'
+                      : run.conclusion === 'failure' ? 'err'
+                      : '';
+            log(`${cls}: Status: ${status}`, cls);
+          }
+          if (run.status === 'completed') {
+            log(`ok: Run complete. View log: ${run.html_url}`);
+            onComplete();
+            btn.disabled = false;
+            return;
+          }
+        } catch(e) { /* retry next poll */ }
+      }
+      log('warn: Timed out waiting for run. Check GitHub Actions for the result.');
+      btn.disabled = false;
+    }
+
+    // ============================================================
+    // GitHub API helpers
+    // ============================================================
+    function ghHeaders() {
+      return {
+        'Authorization': `Bearer ${CFG.GITHUB_TOKEN}`,
+        'Accept': 'application/vnd.github.v3+json',
+        'Content-Type': 'application/json',
+      };
+    }
+    async function ghGet(path) {
+      const resp = await fetch(`https://api.github.com/repos/${CFG.REPO}/${path}`,
+        { headers: ghHeaders() });
+      return resp.json();
+    }
+
+    // ============================================================
+    // Status log
+    // ============================================================
+    function log(msg, cls) {
+      const el = document.getElementById('status-log');
+      if (msg === 'clear') { el.innerHTML = ''; el.classList.remove('visible'); return; }
+      el.classList.add('visible');
+      const prefix = cls === 'ok' ? '✓ ' : cls === 'err' ? '✗ ' : cls === 'warn' ? '⚠ ' : '  ';
+      const line = document.createElement('div');
+      line.className = 'log-line' + (cls ? ' ' + cls : '');
+      // Strip the cls prefix from msg if already present, use prefix instead
+      line.textContent = prefix + msg.replace(/^(ok|err|warn): /, '');
+      el.appendChild(line);
+      el.scrollTop = el.scrollHeight;
+    }
+
+    // ============================================================
+    // Utils
+    // ============================================================
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+  </script>
+</body>
+</html>

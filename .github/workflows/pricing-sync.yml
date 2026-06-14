@@ -1,0 +1,30 @@
+name: Sync Smartsheet
+
+on:
+  workflow_dispatch:
+    inputs:
+      execute:
+        description: 'Write changes to Smartsheet (unchecked = dry run)'
+        type: boolean
+        default: false
+
+jobs:
+  sync:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Run Smartsheet sync
+        shell: pwsh
+        env:
+          SMARTSHEET_ACCESS_TOKEN: ${{ secrets.SMARTSHEET_ACCESS_TOKEN }}
+        run: |
+          $execArg = if ("${{ inputs.execute }}" -eq "true") { "--execute" } else { "" }
+          python scripts/sp_qa_checklist_sync.py sync $execArg

@@ -1,0 +1,44 @@
+name: Run Pricing QA
+
+on:
+  workflow_dispatch:
+    inputs:
+      locations:
+        description: 'Comma-separated WP slugs (e.g. ohio-akron,ohio-westlake) or "all"'
+        type: string
+        required: true
+        default: 'all'
+      execute:
+        description: 'Write results to Smartsheet (unchecked = dry run)'
+        type: boolean
+        default: false
+
+jobs:
+  qa:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install Python dependencies
+        run: pip install requests
+
+      - name: Install Playwright
+        run: npm install playwright
+
+      - name: Run Pricing QA
+        shell: pwsh
+        env:
+          SMARTSHEET_ACCESS_TOKEN: ${{ secrets.SMARTSHEET_ACCESS_TOKEN }}
+        run: |
+          $locsInput = "${{ inputs.locations }}"
+          $locArg   = if ($locsInput -eq "all") { "--all" } else { "--locations `"$locsInput`"" }
+          $execArg  = if ("${{ inputs.execute }}" -eq "true") { "--execute" } else { "" }
+          Invoke-Expression "python scripts/pricing_qa_runner.py $locArg $execArg"
