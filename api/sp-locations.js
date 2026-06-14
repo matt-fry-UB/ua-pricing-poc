@@ -21,12 +21,12 @@ module.exports = async function handler(req, res) {
         if (!resp.ok) return null;
         const json = await resp.json();
         const memberships = json.data || [];
-        // Legacy locations have Deluxe/Ultimate/Platinum memberships
-        const isLegacy = memberships.some(m =>
-          /\b(deluxe|ultimate|platinum)\b/i.test(m.parkProductName)
+        // Simplified locations always have an "Unlimited Play" membership;
+        // legacy locations use Deluxe/Ultimate/Platinum naming and never have one
+        const isSimplified = memberships.some(m =>
+          /\bunlimited play\b/i.test(m.parkProductName)
         );
-        // Require at least one membership to confirm the park is active/configured
-        return memberships.length > 0 && !isLegacy ? park.name : null;
+        return isSimplified ? park.name : null;
       })
     );
 
