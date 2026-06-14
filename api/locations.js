@@ -25,7 +25,7 @@ module.exports = async function handler(req, res) {
         city,
         state:  statePart,
         url:    slug ? `https://ua-pricing-poc.vercel.app/${slug}` : null,
-        apiUrl: slug ? `https://ua-pricing-poc.vercel.app/api/location/${slug}` : null,
+        apiUrl: slug ? `https://ua-pricing-poc.vercel.app/api/location?slug=${slug}` : null,
       };
     }).filter(l => l.slug);
 
