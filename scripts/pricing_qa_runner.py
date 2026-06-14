@@ -305,6 +305,11 @@ def build_mismatch(item_name, ref_val, cc_val, web_val):
             return "; ".join(parts)
         return None
 
+    # Website-only pass/fail items (e.g. PARTY-TIME check) produce a "FAIL: ..." string
+    # when the check fails. That description IS the mismatch -- surface it directly.
+    if web_val and str(web_val).startswith("FAIL:"):
+        return str(web_val)
+
     ref_n = norm_for_compare(ref_val)
     cc_n  = norm_for_compare(cc_val)  if item_name not in CC_SKIP_ITEMS else None
     web_n = norm_for_compare(web_val)
