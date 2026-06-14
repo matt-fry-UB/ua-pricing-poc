@@ -101,16 +101,30 @@
     }
     .btn-sm:hover { background: var(--g200); }
     .loc-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-      gap: 6px 16px;
-      max-height: 260px;
+      max-height: 380px;
       overflow-y: auto;
       border: 1px solid var(--g200);
       border-radius: 8px;
       padding: 12px 16px;
       margin-bottom: 16px;
       background: var(--g100);
+    }
+    .loc-section + .loc-section {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 1px solid var(--g300);
+    }
+    .loc-section-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .6px;
+      color: var(--g500);
+      margin-bottom: 8px;
+    }
+    .loc-col-grid {
+      column-count: 3;
+      column-gap: 16px;
     }
     .loc-item {
       display: flex;
@@ -120,6 +134,8 @@
       color: var(--g700);
       cursor: pointer;
       user-select: none;
+      break-inside: avoid;
+      padding: 2px 0;
     }
     .loc-item input[type="checkbox"] {
       accent-color: var(--black);
@@ -259,27 +275,62 @@
     // ── Location checkboxes ───────────────────────────────────
     async function loadLocations() {
       try {
-        const resp = await fetch(`${CFG.CC_API}/locations`);
-        const data = await resp.json();
-        const locs = Array.isArray(data) ? data : (data.locations || []);
-        renderLocations(locs);
+        const [allResult, spResult] = await Promise.allSettled([
+          fetch(`${CFG.CC_API}/locations`).then(r => r.json()),
+          fetch('/api/sp-locations').then(r => r.json()),
+        ]);
+        const allData = allResult.status === 'fulfilled' ? allResult.value : {};
+        const allLocs = Array.isArray(allData) ? allData : (allData.locations || []);
+        const spVal   = spResult.status === 'fulfilled' ? spResult.value : {};
+        const spNames = spVal.error ? null : new Set(spVal.names || []);
+        renderLocations(allLocs, spNames);
       } catch (e) {
         document.getElementById('loc-grid').innerHTML =
           `<span class="loc-loading" style="color:var(--error)">Failed to load locations: ${e.message}</span>`;
       }
     }
 
-    function renderLocations(locs) {
+    function makeCheckbox(loc, checked) {
+      return `<label class="loc-item">
+        <input type="checkbox" value="${esc(loc.name)}" ${checked ? 'checked' : ''} onchange="updateSelCount()" />
+        ${esc(loc.name)}
+      </label>`;
+    }
+
+    function renderLocations(locs, spNames) {
       const grid = document.getElementById('loc-grid');
       if (!locs || !locs.length) {
         grid.innerHTML = '<span class="loc-loading">No locations found.</span>';
         return;
       }
-      grid.innerHTML = locs.map(loc => `
-        <label class="loc-item">
-          <input type="checkbox" value="${esc(loc.name)}" onchange="updateSelCount()" />
-          ${esc(loc.name)}
-        </label>`).join('');
+
+      if (!spNames || !spNames.size) {
+        // Fallback: no grouping, all locations in one column grid
+        grid.innerHTML = `<div class="loc-section"><div class="loc-col-grid">${
+          locs.map(l => makeCheckbox(l, false)).join('')
+        }</div></div>`;
+        updateSelCount();
+        return;
+      }
+
+      const spLocs    = locs.filter(l => spNames.has(l.name));
+      const otherLocs = locs.filter(l => !spNames.has(l.name));
+
+      let html = '';
+      if (spLocs.length) {
+        html += `<div class="loc-section">
+          <div class="loc-section-label">Simplified Pricing (${spLocs.length})</div>
+          <div class="loc-col-grid">${spLocs.map(l => makeCheckbox(l, true)).join('')}</div>
+        </div>`;
+      }
+      if (otherLocs.length) {
+        html += `<div class="loc-section">
+          <div class="loc-section-label">All Other Locations (${otherLocs.length})</div>
+          <div class="loc-col-grid">${otherLocs.map(l => makeCheckbox(l, false)).join('')}</div>
+        </div>`;
+      }
+
+      grid.innerHTML = html;
       updateSelCount();
     }
 
