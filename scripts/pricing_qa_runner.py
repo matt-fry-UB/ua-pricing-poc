@@ -21,6 +21,7 @@ import argparse
 import decimal
 import json
 import os
+import re
 import subprocess
 import sys
 
@@ -278,21 +279,45 @@ def map_web_to_qa(scrape):
 # Comparison
 # ============================================================
 
+def _norm_attr(name):
+    """Normalise an attraction name for loose comparison.
+    Strips all non-alphanumeric characters and lowercases, so
+    'Pro Zone' == 'ProZone', 'Laser Tags' ~= 'Laser Tag', etc."""
+    return re.sub(r"[^a-z0-9]", "", name.lower())
+
+
+def _attr_match(a, b):
+    """Loose equality for two attraction names.
+    True if their normalised forms are equal OR one is a substring of
+    the other (minimum 4 chars to avoid spurious short matches), which
+    handles cases like 'SkyRider' matching 'SkyRider Indoor Zipline'."""
+    na, nb = _norm_attr(a), _norm_attr(b)
+    if na == nb:
+        return True
+    shorter, longer = (na, nb) if len(na) <= len(nb) else (nb, na)
+    return len(shorter) >= 4 and shorter in longer
+
+
+def _fuzzy_unmatched(source, target):
+    """Items in source with no loose match anywhere in target."""
+    return sorted(s for s in source if not any(_attr_match(s, t) for t in target))
+
+
 def build_mismatch(item_name, ref_val, cc_val, web_val):
     """Return a mismatch description string, or None if everything agrees."""
     if item_name in SKIP_ITEMS:
         return None
 
-    # List-type items: compare as sets, report symmetric difference
+    # List-type items: compare with loose matching, report unmatched items
     def is_list(v):
         return v and ", " in str(v)
 
     if is_list(cc_val) or is_list(web_val):
         cc_set  = set(str(cc_val).split(", "))  if cc_val  else set()
         web_set = set(str(web_val).split(", ")) if web_val else set()
-        if cc_set and web_set and cc_set != web_set:
-            cc_only  = sorted(cc_set  - web_set)
-            web_only = sorted(web_set - cc_set)
+        if cc_set and web_set:
+            cc_only  = _fuzzy_unmatched(cc_set,  web_set)
+            web_only = _fuzzy_unmatched(web_set, cc_set)
             parts = []
             if cc_only:
                 sample = cc_only[:2]
@@ -302,7 +327,7 @@ def build_mismatch(item_name, ref_val, cc_val, web_val):
                 sample = web_only[:2]
                 parts.append(f"Web only: {', '.join(sample)}" +
                              (f" (+{len(web_only)-2} more)" if len(web_only) > 2 else ""))
-            return "; ".join(parts)
+            return "; ".join(parts) if parts else None
         return None
 
     # Website-only pass/fail items (e.g. PARTY-TIME check) produce a "FAIL: ..." string
