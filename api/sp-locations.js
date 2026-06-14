@@ -3,7 +3,7 @@
 // Requires SMARTSHEET_ACCESS_TOKEN env var.
 
 const QA_SHEET_ID  = '3089334252031876';
-const TASK_COL_ID  = '8869681732816772'; // primary "Location Name" column
+const TASK_COL_ID  = '3847554830995332'; // primary "Location Name" column (QA_COL["task"])
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
