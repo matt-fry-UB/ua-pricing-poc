@@ -79,18 +79,16 @@
       color: var(--g400);
       margin-bottom: 18px;
     }
-    .last-run .run-status {
-      font-weight: 600;
-    }
+    .last-run .run-status { font-weight: 600; }
     .last-run .run-status.success { color: var(--success); }
     .last-run .run-status.failure { color: var(--error); }
     .last-run .run-status.running { color: var(--warn); }
 
-    /* Location checkboxes */
     .loc-controls {
       display: flex;
       gap: 10px;
       margin-bottom: 12px;
+      align-items: center;
     }
     .btn-sm {
       font: 600 12px 'Nunito Sans', sans-serif;
@@ -134,8 +132,6 @@
       color: var(--g400);
       padding: 8px 0;
     }
-
-    /* Dry run toggle */
     .toggle-row {
       display: flex;
       align-items: center;
@@ -153,8 +149,6 @@
       font-size: 12px;
       color: var(--g400);
     }
-
-    /* Buttons */
     .btn-primary {
       font: 700 14px 'Nunito Sans', sans-serif;
       padding: 12px 28px;
@@ -166,10 +160,13 @@
       letter-spacing: .3px;
       transition: opacity .15s;
     }
-    .btn-primary:hover { opacity: .85; }
+    .btn-primary:hover  { opacity: .85; }
     .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
-
-    /* Status log */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--g200);
+      margin: 4px 0 20px;
+    }
     #status-log {
       background: var(--black);
       color: #d4f7da;
@@ -182,26 +179,9 @@
     }
     #status-log.visible { display: block; }
     .log-line { white-space: pre-wrap; }
-    .log-line.err { color: #fca5a5; }
+    .log-line.err  { color: #fca5a5; }
     .log-line.warn { color: #fde68a; }
-    .log-line.ok { color: #6ee7b7; }
-
-    .divider {
-      border: none;
-      border-top: 1px solid var(--g200);
-      margin: 4px 0 20px;
-    }
-
-    /* Warning banner if PAT not set */
-    .pat-warning {
-      background: #fef3c7;
-      border: 1px solid #fcd34d;
-      border-radius: 8px;
-      padding: 12px 16px;
-      font-size: 13px;
-      color: #92400e;
-      margin-bottom: 20px;
-    }
+    .log-line.ok   { color: #6ee7b7; }
   </style>
 </head>
 <body>
@@ -211,12 +191,6 @@
   </header>
 
   <main>
-    <div id="pat-warning" class="pat-warning" style="display:none">
-      GitHub token not configured. Open this file in a text editor and replace
-      <code>REPLACE_WITH_YOUR_PAT</code> with a GitHub personal access token
-      that has the <strong>workflow</strong> scope.
-    </div>
-
     <!-- ── Card 1: Sync Smartsheet ── -->
     <div class="card">
       <h2>Sync Smartsheet</h2>
@@ -249,7 +223,7 @@
       <div class="loc-controls">
         <button class="btn-sm" onclick="selectAll()">Select All</button>
         <button class="btn-sm" onclick="clearAll()">Clear All</button>
-        <span id="sel-count" style="font-size:13px;color:var(--g500);align-self:center;margin-left:4px;"></span>
+        <span id="sel-count" style="font-size:13px;color:var(--g500);margin-left:4px;"></span>
       </div>
       <div id="loc-grid" class="loc-grid">
         <span class="loc-loading">Loading locations...</span>
@@ -268,41 +242,29 @@
   </main>
 
   <script>
-    // ============================================================
-    // CONFIG — replace GITHUB_TOKEN with a PAT (workflow scope)
-    // ============================================================
     const CFG = {
-      GITHUB_TOKEN: 'REPLACE_WITH_YOUR_PAT',
-      REPO:         'matt-fry-UB/ua-pricing-poc',
-      BRANCH:       'main',
-      CC_API:       'https://ua-pricing-poc.vercel.app/api',
-      SYNC_WF:      'pricing-sync.yml',
-      QA_WF:        'pricing-qa.yml',
+      BRANCH:  'main',
+      CC_API:  'https://ua-pricing-poc.vercel.app/api',
+      SYNC_WF: 'pricing-sync.yml',
+      QA_WF:   'pricing-qa.yml',
     };
 
-    // ============================================================
-    // Startup
-    // ============================================================
-    document.addEventListener('DOMContentLoaded', async () => {
-      if (CFG.GITHUB_TOKEN === 'REPLACE_WITH_YOUR_PAT') {
-        document.getElementById('pat-warning').style.display = 'block';
-      }
+    // ── Startup ──────────────────────────────────────────────
+    document.addEventListener('DOMContentLoaded', () => {
       loadLocations();
       refreshLastRun('sync');
       refreshLastRun('qa');
     });
 
-    // ============================================================
-    // Location checkboxes
-    // ============================================================
+    // ── Location checkboxes ───────────────────────────────────
     async function loadLocations() {
       try {
         const resp = await fetch(`${CFG.CC_API}/locations`);
         const locs = await resp.json();
         renderLocations(locs);
-      } catch(e) {
+      } catch (e) {
         document.getElementById('loc-grid').innerHTML =
-          '<span class="loc-loading" style="color:var(--error)">Failed to load locations. ' + e.message + '</span>';
+          `<span class="loc-loading" style="color:var(--error)">Failed to load locations: ${e.message}</span>`;
       }
     }
 
@@ -314,188 +276,166 @@
       }
       grid.innerHTML = locs.map(loc => `
         <label class="loc-item">
-          <input type="checkbox" value="${escHtml(loc.slug)}" onchange="updateSelCount()" />
-          ${escHtml(loc.name || loc.slug)}
-        </label>
-      `).join('');
+          <input type="checkbox" value="${esc(loc.slug)}" onchange="updateSelCount()" />
+          ${esc(loc.name || loc.slug)}
+        </label>`).join('');
       updateSelCount();
     }
 
     function selectAll() {
-      document.querySelectorAll('#loc-grid input[type=checkbox]').forEach(c => c.checked = true);
+      document.querySelectorAll('#loc-grid input').forEach(c => c.checked = true);
       updateSelCount();
     }
     function clearAll() {
-      document.querySelectorAll('#loc-grid input[type=checkbox]').forEach(c => c.checked = false);
+      document.querySelectorAll('#loc-grid input').forEach(c => c.checked = false);
       updateSelCount();
     }
     function updateSelCount() {
-      const total = document.querySelectorAll('#loc-grid input[type=checkbox]').length;
-      const sel = document.querySelectorAll('#loc-grid input[type=checkbox]:checked').length;
-      document.getElementById('sel-count').textContent = sel === total
-        ? `All ${total} selected`
-        : `${sel} of ${total} selected`;
+      const total = document.querySelectorAll('#loc-grid input').length;
+      const sel   = document.querySelectorAll('#loc-grid input:checked').length;
+      document.getElementById('sel-count').textContent =
+        sel === total ? `All ${total} selected` : `${sel} of ${total} selected`;
     }
     function selectedSlugs() {
-      return Array.from(document.querySelectorAll('#loc-grid input[type=checkbox]:checked'))
-        .map(c => c.value);
+      return Array.from(document.querySelectorAll('#loc-grid input:checked')).map(c => c.value);
     }
 
-    // ============================================================
-    // Last-run timestamps
-    // ============================================================
+    // ── Last-run timestamps ───────────────────────────────────
     async function refreshLastRun(tool) {
-      const wf    = tool === 'sync' ? CFG.SYNC_WF : CFG.QA_WF;
-      const elId  = tool === 'sync' ? 'sync-last-run' : 'qa-last-run';
-      const el    = document.getElementById(elId);
+      const wf  = tool === 'sync' ? CFG.SYNC_WF : CFG.QA_WF;
+      const el  = document.getElementById(`${tool}-last-run`);
       try {
-        const runs = await ghGet(`actions/workflows/${wf}/runs?per_page=1`);
-        const run  = runs.workflow_runs?.[0];
+        const data = await ghGet(`actions/workflows/${wf}/runs?per_page=1`);
+        const run  = data.workflow_runs?.[0];
         if (!run) { el.textContent = 'Last run: never'; return; }
-        const when     = new Date(run.created_at).toLocaleString();
-        const statusCls = run.conclusion === 'success' ? 'success'
-                        : run.conclusion === 'failure' ? 'failure'
-                        : 'running';
-        const label    = run.conclusion || run.status;
-        el.innerHTML   = `Last run: ${when} -- <span class="run-status ${statusCls}">${label}</span>
+        const when = new Date(run.created_at).toLocaleString();
+        const cls  = run.conclusion === 'success' ? 'success'
+                   : run.conclusion === 'failure' ? 'failure' : 'running';
+        el.innerHTML = `Last run: ${when} -- <span class="run-status ${cls}">${run.conclusion || run.status}</span>
           <a href="${run.html_url}" target="_blank" style="font-size:12px;color:var(--g400);margin-left:6px;">[view log]</a>`;
-      } catch(e) {
+      } catch {
         el.textContent = 'Last run: unavailable';
       }
     }
 
-    // ============================================================
-    // Trigger: Sync
-    // ============================================================
+    // ── Sync button ───────────────────────────────────────────
     async function runSync() {
       const execute = document.getElementById('sync-execute').checked;
       const btn = document.getElementById('sync-btn');
       btn.disabled = true;
       log('clear');
-      log(`Triggering Sync Smartsheet workflow${execute ? '' : ' (dry run)'}...`);
-      const ok = await triggerWorkflow(CFG.SYNC_WF, { execute: String(execute) });
+      log(`Triggering Sync Smartsheet${execute ? '' : ' (dry run)'}...`);
+      const ok = await dispatch(CFG.SYNC_WF, { execute: String(execute) });
       if (!ok) { btn.disabled = false; return; }
       await monitorRun(CFG.SYNC_WF, btn, () => refreshLastRun('sync'));
     }
 
-    // ============================================================
-    // Trigger: QA
-    // ============================================================
+    // ── QA button ─────────────────────────────────────────────
     async function runQA() {
       const slugs   = selectedSlugs();
       const execute = document.getElementById('qa-execute').checked;
       const btn     = document.getElementById('qa-btn');
-
       if (!slugs.length) {
         log('clear');
-        log('warn: No locations selected. Please check at least one location.');
+        log('warn: Select at least one location first.');
         return;
       }
-
       btn.disabled = true;
       log('clear');
       const locStr = slugs.join(',');
       log(`Triggering Pricing QA for ${slugs.length} location(s)${execute ? '' : ' (dry run)'}...`);
       log(`  Locations: ${locStr}`);
-      const ok = await triggerWorkflow(CFG.QA_WF, { locations: locStr, execute: String(execute) });
+      const ok = await dispatch(CFG.QA_WF, { locations: locStr, execute: String(execute) });
       if (!ok) { btn.disabled = false; return; }
       await monitorRun(CFG.QA_WF, btn, () => refreshLastRun('qa'));
     }
 
-    // ============================================================
-    // Workflow dispatch + polling
-    // ============================================================
-    async function triggerWorkflow(workflowFile, inputs) {
+    // ── Workflow dispatch + polling ───────────────────────────
+    async function dispatch(workflowFile, inputs) {
       try {
-        const resp = await fetch(
-          `https://api.github.com/repos/${CFG.REPO}/actions/workflows/${workflowFile}/dispatches`,
-          {
-            method: 'POST',
-            headers: ghHeaders(),
-            body: JSON.stringify({ ref: CFG.BRANCH, inputs }),
-          }
+        const resp = await ghPost(
+          `actions/workflows/${workflowFile}/dispatches`,
+          { ref: CFG.BRANCH, inputs }
         );
-        if (resp.status === 204) {
+        if (resp === null) { // 204 No Content = success
           log('ok: Workflow triggered. Waiting for run to start...');
           return true;
         }
-        const body = await resp.text();
-        log(`err: GitHub returned ${resp.status}: ${body.slice(0,200)}`);
+        log(`err: GitHub returned an error: ${JSON.stringify(resp).slice(0, 200)}`);
         return false;
-      } catch(e) {
-        log(`err: Failed to trigger workflow: ${e.message}`);
+      } catch (e) {
+        log(`err: ${e.message}`);
         return false;
       }
     }
 
     async function monitorRun(workflowFile, btn, onComplete) {
-      // Wait a moment, then find the newly created run
       await sleep(4000);
       const since = new Date(Date.now() - 30000).toISOString();
       let runId = null;
 
-      for (let attempt = 0; attempt < 8; attempt++) {
+      for (let i = 0; i < 8; i++) {
         try {
           const data = await ghGet(`actions/workflows/${workflowFile}/runs?per_page=5`);
-          const run = (data.workflow_runs || []).find(r => r.created_at > since);
+          const run  = (data.workflow_runs || []).find(r => r.created_at > since);
           if (run) { runId = run.id; break; }
-        } catch(e) { /* retry */ }
+        } catch { /* retry */ }
         await sleep(3000);
       }
 
       if (!runId) {
-        log('warn: Could not locate the triggered run. Check GitHub Actions manually.');
+        log('warn: Could not locate the run. Check GitHub Actions manually.');
         btn.disabled = false;
         return;
       }
 
-      log(`ok: Run started (id ${runId}). Polling for completion...`);
+      log(`ok: Run found (id ${runId}). Polling for completion...`);
+      let lastStatus = '';
 
-      // Poll until done (max 20 minutes)
-      let status = '';
       for (let i = 0; i < 80; i++) {
         await sleep(15000);
         try {
-          const run = await ghGet(`actions/runs/${runId}`);
-          const newStatus = run.status + (run.conclusion ? ' / ' + run.conclusion : '');
-          if (newStatus !== status) {
-            status = newStatus;
-            const cls = run.conclusion === 'success' ? 'ok'
-                      : run.conclusion === 'failure' ? 'err'
-                      : '';
-            log(`${cls}: Status: ${status}`, cls);
+          const run    = await ghGet(`actions/runs/${runId}`);
+          const status = run.status + (run.conclusion ? ' / ' + run.conclusion : '');
+          if (status !== lastStatus) {
+            lastStatus = status;
+            const cls  = run.conclusion === 'success' ? 'ok'
+                       : run.conclusion === 'failure' ? 'err' : '';
+            log(`Status: ${status}`, cls);
           }
           if (run.status === 'completed') {
-            log(`ok: Run complete. View log: ${run.html_url}`);
+            log(`ok: Done. View log: ${run.html_url}`);
             onComplete();
             btn.disabled = false;
             return;
           }
-        } catch(e) { /* retry next poll */ }
+        } catch { /* retry */ }
       }
-      log('warn: Timed out waiting for run. Check GitHub Actions for the result.');
+      log('warn: Timed out. Check GitHub Actions for the result.');
       btn.disabled = false;
     }
 
-    // ============================================================
-    // GitHub API helpers
-    // ============================================================
-    function ghHeaders() {
-      return {
-        'Authorization': `Bearer ${CFG.GITHUB_TOKEN}`,
-        'Accept': 'application/vnd.github.v3+json',
-        'Content-Type': 'application/json',
-      };
-    }
+    // ── GitHub API (via server-side proxy) ────────────────────
     async function ghGet(path) {
-      const resp = await fetch(`https://api.github.com/repos/${CFG.REPO}/${path}`,
-        { headers: ghHeaders() });
+      const resp = await fetch('/api/github-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ghMethod: 'GET', ghPath: path }),
+      });
       return resp.json();
     }
 
-    // ============================================================
-    // Status log
-    // ============================================================
+    async function ghPost(path, body) {
+      const resp = await fetch('/api/github-proxy', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ghMethod: 'POST', ghPath: path, ghBody: body }),
+      });
+      if (resp.status === 204) return null;
+      return resp.json();
+    }
+
+    // ── Status log ────────────────────────────────────────────
     function log(msg, cls) {
       const el = document.getElementById('status-log');
       if (msg === 'clear') { el.innerHTML = ''; el.classList.remove('visible'); return; }
@@ -503,16 +443,12 @@
       const prefix = cls === 'ok' ? '✓ ' : cls === 'err' ? '✗ ' : cls === 'warn' ? '⚠ ' : '  ';
       const line = document.createElement('div');
       line.className = 'log-line' + (cls ? ' ' + cls : '');
-      // Strip the cls prefix from msg if already present, use prefix instead
       line.textContent = prefix + msg.replace(/^(ok|err|warn): /, '');
       el.appendChild(line);
       el.scrollTop = el.scrollHeight;
     }
 
-    // ============================================================
-    // Utils
-    // ============================================================
-    function escHtml(s) {
+    function esc(s) {
       return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
