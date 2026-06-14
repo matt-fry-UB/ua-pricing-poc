@@ -26,5 +26,8 @@ jobs:
         env:
           SMARTSHEET_ACCESS_TOKEN: ${{ secrets.SMARTSHEET_ACCESS_TOKEN }}
         run: |
-          $execArg = if ("${{ inputs.execute }}" -eq "true") { "--execute" } else { "" }
-          python scripts/sp_qa_checklist_sync.py sync $execArg
+          if ("${{ inputs.execute }}" -eq "true") {
+            python scripts/sp_qa_checklist_sync.py sync --execute
+          } else {
+            python scripts/sp_qa_checklist_sync.py sync
+          }

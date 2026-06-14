@@ -39,6 +39,16 @@ jobs:
           SMARTSHEET_ACCESS_TOKEN: ${{ secrets.SMARTSHEET_ACCESS_TOKEN }}
         run: |
           $locsInput = "${{ inputs.locations }}"
-          $locArg   = if ($locsInput -eq "all") { "--all" } else { "--locations `"$locsInput`"" }
-          $execArg  = if ("${{ inputs.execute }}" -eq "true") { "--execute" } else { "" }
-          Invoke-Expression "python scripts/pricing_qa_runner.py $locArg $execArg"
+          if ($locsInput -eq "all") {
+            if ("${{ inputs.execute }}" -eq "true") {
+              python scripts/pricing_qa_runner.py --all --execute
+            } else {
+              python scripts/pricing_qa_runner.py --all
+            }
+          } else {
+            if ("${{ inputs.execute }}" -eq "true") {
+              python scripts/pricing_qa_runner.py --locations "$locsInput" --execute
+            } else {
+              python scripts/pricing_qa_runner.py --locations "$locsInput"
+            }
+          }

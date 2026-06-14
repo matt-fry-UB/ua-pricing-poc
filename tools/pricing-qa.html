@@ -260,7 +260,8 @@
     async function loadLocations() {
       try {
         const resp = await fetch(`${CFG.CC_API}/locations`);
-        const locs = await resp.json();
+        const data = await resp.json();
+        const locs = Array.isArray(data) ? data : (data.locations || []);
         renderLocations(locs);
       } catch (e) {
         document.getElementById('loc-grid').innerHTML =
