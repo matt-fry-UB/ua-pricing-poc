@@ -1,4 +1,4 @@
-// GET /api/location/:slug  (e.g. /api/location/indiana-noblesville)
+// GET /api/location?slug=indiana-noblesville
 // Returns all available pricing and attraction data for a single Urban Air location.
 
 const {
@@ -15,13 +15,13 @@ const {
   stripSuffix,
   makeCityStripper,
   formatProduct,
-} = require('../_shared');
+} = require('./_shared');
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
 
   const { slug } = req.query;
-  if (!slug) return res.status(400).json({ error: 'Missing slug parameter' });
+  if (!slug) return res.status(400).json({ error: 'Missing slug parameter. Usage: /api/location?slug=indiana-noblesville' });
 
   try {
     // Resolve slug → park
@@ -72,10 +72,10 @@ module.exports = async function handler(req, res) {
     const cleanAnnual = cleanStrip(annualPasses).filter(p => !HIDE_PRODUCT(p.parkProductName));
 
     // Classify tickets
-    const primaryTickets    = tickets.filter(t => !IS_SECONDARY(t.parkProductName));
-    const secondaryTickets  = tickets.filter(t => IS_SECONDARY(t.parkProductName));
-    const goKartsTicket     = primaryTickets.find(IS_GOKARTS) || null;
-    const pricingModel      = detectPricingModel(primaryTickets);
+    const primaryTickets   = tickets.filter(t => !IS_SECONDARY(t.parkProductName));
+    const secondaryTickets = tickets.filter(t => IS_SECONDARY(t.parkProductName));
+    const goKartsTicket    = primaryTickets.find(IS_GOKARTS) || null;
+    const pricingModel     = detectPricingModel(primaryTickets);
 
     // Deduplicate birthday hangouts by resourceTypeId
     const hangouts = Object.values(
@@ -94,7 +94,6 @@ module.exports = async function handler(req, res) {
       link:    wa.link || null,
     }));
 
-    // Build response
     const [city = '', statePart = ''] = park.name.split(',').map(s => s.trim());
     const locationSlug = buildLocationSlug(park.name);
 
@@ -114,14 +113,14 @@ module.exports = async function handler(req, res) {
         urbanAir:   `https://www.urbanair.com/${park.urlSlug || ''}`,
       },
       pricing: {
-        model:           pricingModel,
-        pricingDate:     date || null,
-        tickets:         primaryTickets.map(formatProduct),
+        model:            pricingModel,
+        pricingDate:      date || null,
+        tickets:          primaryTickets.map(formatProduct),
         secondaryTickets: secondaryTickets.map(formatProduct),
-        goKartsIncluded: !!goKartsTicket,
-        memberships:     cleanMem.map(formatProduct),
-        annualPasses:    cleanAnnual.map(formatProduct),
-        merch:           cleanMerch.map(formatProduct),
+        goKartsIncluded:  !!goKartsTicket,
+        memberships:      cleanMem.map(formatProduct),
+        annualPasses:     cleanAnnual.map(formatProduct),
+        merch:            cleanMerch.map(formatProduct),
       },
       birthday: {
         packages: birthdayPackages,
