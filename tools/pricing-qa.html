@@ -277,8 +277,8 @@
       }
       grid.innerHTML = locs.map(loc => `
         <label class="loc-item">
-          <input type="checkbox" value="${esc(loc.slug)}" onchange="updateSelCount()" />
-          ${esc(loc.name || loc.slug)}
+          <input type="checkbox" value="${esc(loc.name)}" onchange="updateSelCount()" />
+          ${esc(loc.name)}
         </label>`).join('');
       updateSelCount();
     }
@@ -297,7 +297,7 @@
       document.getElementById('sel-count').textContent =
         sel === total ? `All ${total} selected` : `${sel} of ${total} selected`;
     }
-    function selectedSlugs() {
+    function selectedNames() {
       return Array.from(document.querySelectorAll('#loc-grid input:checked')).map(c => c.value);
     }
 
@@ -333,19 +333,19 @@
 
     // ── QA button ─────────────────────────────────────────────
     async function runQA() {
-      const slugs   = selectedSlugs();
+      const names   = selectedNames();
       const execute = document.getElementById('qa-execute').checked;
       const btn     = document.getElementById('qa-btn');
-      if (!slugs.length) {
+      if (!names.length) {
         log('clear');
         log('warn: Select at least one location first.');
         return;
       }
       btn.disabled = true;
       log('clear');
-      const locStr = slugs.join(',');
-      log(`Triggering Pricing QA for ${slugs.length} location(s)${execute ? '' : ' (dry run)'}...`);
-      log(`  Locations: ${locStr}`);
+      const locStr = names.join('|');
+      log(`Triggering Pricing QA for ${names.length} location(s)${execute ? '' : ' (dry run)'}...`);
+      log(`  Locations: ${names.join(', ')}`);
       const ok = await dispatch(CFG.QA_WF, { locations: locStr, execute: String(execute) });
       if (!ok) { btn.disabled = false; return; }
       await monitorRun(CFG.QA_WF, btn, () => refreshLastRun('qa'));

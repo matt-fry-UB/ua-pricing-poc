@@ -369,16 +369,13 @@ def run(location_slugs, execute):
             if info.get("wp_slug")
         ]
     else:
-        slug_to_name = {
-            info["wp_slug"]: n for n, info in parents.items() if info.get("wp_slug")
-        }
         targets = []
-        for slug in location_slugs:
-            name = slug_to_name.get(slug)
-            if not name:
-                print(f"  WARNING: '{slug}' not found in QA sheet (no WP Slug match), skipping")
+        for loc_name in location_slugs:
+            info = parents.get(loc_name)
+            if not info or not info.get("wp_slug"):
+                print(f"  WARNING: '{loc_name}' not found in QA sheet (check name matches exactly), skipping")
             else:
-                targets.append({"name": name, "wp_slug": slug})
+                targets.append({"name": loc_name, "wp_slug": info["wp_slug"]})
 
     if not targets:
         sys.exit("No matching locations found.")
@@ -452,12 +449,12 @@ if __name__ == "__main__":
                                  formatter_class=argparse.RawDescriptionHelpFormatter)
     grp = ap.add_mutually_exclusive_group(required=True)
     grp.add_argument("--locations",
-                     help="Comma-separated WP slugs, e.g. ohio-akron,ohio-westlake")
+                     help="Pipe-separated location names, e.g. 'Akron, OH|Westlake, OH'")
     grp.add_argument("--all", action="store_true",
                      help="Process every location in the QA sheet that has a WP Slug")
     ap.add_argument("--execute", action="store_true",
                     help="Write changes to Smartsheet (default is dry run)")
     args = ap.parse_args()
 
-    slugs = ["all"] if args.all else [s.strip() for s in args.locations.split(",")]
+    slugs = ["all"] if args.all else [s.strip() for s in args.locations.split("|")]
     run(slugs, args.execute)

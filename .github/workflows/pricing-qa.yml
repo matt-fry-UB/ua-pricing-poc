@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       locations:
-        description: 'Comma-separated WP slugs (e.g. ohio-akron,ohio-westlake) or "all"'
+        description: 'Pipe-separated location names (e.g. "Akron, OH|Westlake, OH") or "all"'
         type: string
         required: true
         default: 'all'
