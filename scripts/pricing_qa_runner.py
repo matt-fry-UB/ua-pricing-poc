@@ -280,22 +280,35 @@ def map_web_to_qa(scrape):
 # ============================================================
 
 def _norm_attr(name):
-    """Normalise an attraction name for loose comparison.
-    Strips all non-alphanumeric characters and lowercases, so
-    'Pro Zone' == 'ProZone', 'Laser Tags' ~= 'Laser Tag', etc."""
+    """Lowercase and strip all non-alphanumeric: 'Pro Zone' -> 'prozone'."""
     return re.sub(r"[^a-z0-9]", "", name.lower())
 
 
+def _words_attr(name):
+    """Lowercase word set, keeping punctuation-stripped tokens."""
+    return set(re.sub(r"[^a-z0-9\s]", "", name.lower()).split())
+
+
 def _attr_match(a, b):
-    """Loose equality for two attraction names.
-    True if their normalised forms are equal OR one is a substring of
-    the other (minimum 4 chars to avoid spurious short matches), which
-    handles cases like 'SkyRider' matching 'SkyRider Indoor Zipline'."""
+    """Loose equality for attraction names. Three levels:
+    1. Equal after stripping all non-alphanumeric
+       ('Pro Zone' == 'ProZone', 'Sky Zone' == 'SkyZone')
+    2. Shorter normalised form is a substring of the longer
+       ('SkyRider' matches 'SkyRider Indoor Zipline', 'Laser Tag' matches 'Laser Tags')
+    3. Word-set subset: every word in the shorter name appears in the longer
+       ('Tubes Playground' matches 'Tubes Indoor Playground')
+       Requires 2+ words on both sides to avoid single-word false positives.
+    """
     na, nb = _norm_attr(a), _norm_attr(b)
     if na == nb:
         return True
     shorter, longer = (na, nb) if len(na) <= len(nb) else (nb, na)
-    return len(shorter) >= 4 and shorter in longer
+    if len(shorter) >= 4 and shorter in longer:
+        return True
+    wa, wb = _words_attr(a), _words_attr(b)
+    if len(wa) >= 2 and len(wb) >= 2 and (wa <= wb or wb <= wa):
+        return True
+    return False
 
 
 def _fuzzy_unmatched(source, target):
