@@ -143,8 +143,9 @@ def map_cc_to_qa(cc):
     out["Unlimited Play Birthday"] = fmt_price(main_pkg["minCombinedPrice"] if main_pkg else None)
     out["Small Squad Promo Price"] = fmt_price(small_pkg["minCombinedPrice"] if small_pkg else None)
 
-    if main_pkg:
-        attrs = fmt_list(a["name"] for a in main_pkg.get("attractions", []))
+    if pkg_list:
+        all_attr_names = {a["name"] for pkg in pkg_list for a in pkg.get("attractions", [])}
+        attrs = fmt_list(all_attr_names) if all_attr_names else None
         out["Ticket Attractions"]   = attrs
         out["Birthday Attractions"] = attrs
 
