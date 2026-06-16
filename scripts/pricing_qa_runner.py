@@ -286,8 +286,9 @@ def _norm_attr(name):
 
 
 def _words_attr(name):
-    """Lowercase word set, keeping punctuation-stripped tokens."""
-    return set(re.sub(r"[^a-z0-9\s]", "", name.lower()).split())
+    """Lowercase word set; hyphens become spaces, trailing-s stripped for plural normalisation."""
+    tokens = re.sub(r"[^a-z0-9]+", " ", name.lower()).split()
+    return set(t.rstrip("s") for t in tokens)
 
 
 def _attr_match(a, b):
