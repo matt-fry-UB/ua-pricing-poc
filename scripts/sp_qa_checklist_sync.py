@@ -100,7 +100,9 @@ VERIFIED_FORMULA = ('=IF(COUNT(CHILDREN([QA Item]@row)) = 0, "", '
                     'IF(COUNTIF(CHILDREN(Done@row), 1) = 0, "", "Yellow"), '
                     'IF(COUNTIF(CHILDREN(Mismatch@row), <>"") = 0, "Green", "Red")))')
 
-# Rollout sheet column titles (trailing spaces intentional; they match the sheet)
+# Rollout sheet column titles (trailing spaces intentional; they match the sheet).
+# To make a key rename-resistant, replace its string value with the integer column ID.
+# Run `list-rollout-cols` to print all current column IDs from the live sheet.
 ROLLOUT_COLS = {
     "location": "Location Name",
     "due": "Due Date for Pricing Update",
@@ -111,7 +113,7 @@ ROLLOUT_COLS = {
     "shorty40": "Shorty 40 ",
     "tier": "BIRTHDAY TIER",
     "up_party": "Unlimited Play Party",
-    "ssp_5x": "Small Squad Party 5X Guests",
+    "ssp_5x": "NEW Small Squad Party 2.0 5x Guests",
     "room": "Room Upgrade",
     "suite": "Suite Upgrade",
     "up_membership": "Unlimited Play 12-Month MTM Membership",
@@ -238,7 +240,19 @@ def parse_tier(tier_label):
 def load_rollout_locations():
     sheet = get_sheet(ROLLOUT_SHEET_ID)
     cols = col_map(sheet)
-    key_to_colid = {k: cols[title] for k, title in ROLLOUT_COLS.items()}
+    key_to_colid = {}
+    for k, v in ROLLOUT_COLS.items():
+        if isinstance(v, int):
+            key_to_colid[k] = v  # already a column ID — rename-resistant
+        elif v in cols:
+            key_to_colid[k] = cols[v]
+        else:
+            sys.exit(
+                f"ERROR: rollout sheet column '{v}' (key '{k}') not found.\n"
+                f"Available columns: {sorted(cols)}\n"
+                f"Update ROLLOUT_COLS['{k}'] to the correct title, or replace it with "
+                f"the integer column ID (run 'list-rollout-cols' to see all IDs)."
+            )
     locations, order = {}, []
     for r in row_values(sheet):
         name = r.get(key_to_colid["location"])
@@ -676,12 +690,25 @@ def _norm(v):
         return str(v)
 
 
+def mode_list_rollout_cols():
+    sheet = get_sheet(ROLLOUT_SHEET_ID)
+    print(f"Rollout sheet columns (copy an ID into ROLLOUT_COLS to make that key rename-resistant):\n")
+    for c in sheet["columns"]:
+        marker = ""
+        for k, v in ROLLOUT_COLS.items():
+            if v == c["title"] or v == c["id"]:
+                marker = f"  <- ROLLOUT_COLS['{k}']"
+                break
+        print(f"  {c['id']}  {c['title']!r}{marker}")
+
+
 # ============================================================
 if __name__ == "__main__":
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("mode", choices=["populate", "sync", "migrate-task-column",
-                                    "stamp-locations", "populate-slugs", "apply-verified"])
+                                    "stamp-locations", "populate-slugs", "apply-verified",
+                                    "list-rollout-cols"])
     p.add_argument("--execute", action="store_true",
                    help="actually write changes (default is dry run)")
     p.add_argument("--cell-links", action="store_true",
@@ -699,5 +726,7 @@ if __name__ == "__main__":
         mode_populate_slugs(args.execute, args.excel)
     elif args.mode == "apply-verified":
         mode_apply_verified(args.execute)
+    elif args.mode == "list-rollout-cols":
+        mode_list_rollout_cols()
     else:
         mode_stamp_locations(args.execute)
