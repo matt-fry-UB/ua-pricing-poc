@@ -43,9 +43,9 @@ module.exports = async function handler(req, res) {
       .filter(r => r.status === 'fulfilled' && r.value)
       .map(r => r.value)
       .sort((a, b) => {
-        const [cA, stA = ''] = a.split(',').map(s => s.trim());
-        const [cB, stB = ''] = b.split(',').map(s => s.trim());
-        return stA.localeCompare(stB) || cA.localeCompare(cB);
+        const cA = a.split(',')[0].trim();
+        const cB = b.split(',')[0].trim();
+        return cA.localeCompare(cB);
       });
 
     return res.status(200).json({ count: names.length, names });

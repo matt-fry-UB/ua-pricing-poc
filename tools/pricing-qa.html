@@ -304,17 +304,19 @@
         return;
       }
 
+      const byCity = (a, b) => a.name.split(',')[0].trim().localeCompare(b.name.split(',')[0].trim());
+
       if (!spNames || !spNames.size) {
         // Fallback: no grouping, all locations in one column grid
         grid.innerHTML = `<div class="loc-section"><div class="loc-col-grid">${
-          locs.map(l => makeCheckbox(l, false)).join('')
+          locs.slice().sort(byCity).map(l => makeCheckbox(l, false)).join('')
         }</div></div>`;
         updateSelCount();
         return;
       }
 
-      const spLocs    = locs.filter(l => spNames.has(l.name));
-      const otherLocs = locs.filter(l => !spNames.has(l.name));
+      const spLocs    = locs.filter(l =>  spNames.has(l.name)).sort(byCity);
+      const otherLocs = locs.filter(l => !spNames.has(l.name)).sort(byCity);
 
       let html = '';
       if (spLocs.length) {
