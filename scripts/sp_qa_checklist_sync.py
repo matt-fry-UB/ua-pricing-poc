@@ -100,25 +100,24 @@ VERIFIED_FORMULA = ('=IF(COUNT(CHILDREN([QA Item]@row)) = 0, "", '
                     'IF(COUNTIF(CHILDREN(Done@row), 1) = 0, "", "Yellow"), '
                     'IF(COUNTIF(CHILDREN(Mismatch@row), <>"") = 0, "Green", "Red")))')
 
-# Rollout sheet column titles (trailing spaces intentional; they match the sheet).
-# To make a key rename-resistant, replace its string value with the integer column ID.
-# Run `list-rollout-cols` to print all current column IDs from the live sheet.
+# Rollout sheet column IDs — immune to column renames.
+# Run `list-rollout-cols` to verify or update these if columns are deleted/recreated.
 ROLLOUT_COLS = {
-    "location": "Location Name",
-    "due": "Due Date for Pricing Update",
-    "up_ticket": "Unlimited Play Ticket",
-    "go_karts": "Go-Karts",
-    "up_plus": "Unlimited Play + Ticket",
-    "parent_pass": "Parent Pass",
-    "shorty40": "Shorty 40 ",
-    "tier": "BIRTHDAY TIER",
-    "up_party": "Unlimited Play Party",
-    "ssp_5x": "NEW Small Squad Party 2.0 5x Guests",
-    "room": "Room Upgrade",
-    "suite": "Suite Upgrade",
-    "up_membership": "Unlimited Play 12-Month MTM Membership",
-    "parent_membership": "Parent Membership",
-    "shorty40_membership": "Shorty 40 Membership",
+    "location":            8959216101658500,   # Location Name
+    "due":                   57569963184004,   # Due Date for Pricing Update
+    "up_ticket":            747489107152772,   # Unlimited Play Ticket
+    "go_karts":            4371379188436868,   # Go-Karts
+    "up_plus":             6349633424232324,   # Unlimited Play + Ticket
+    "parent_pass":         8249331818991492,   # Parent Pass
+    "shorty40":            3745732191620996,   # Shorty 40
+    "tier":                4839224993156996,   # BIRTHDAY TIER
+    "up_party":            8601433237917572,   # Unlimited Play Party
+    "ssp_5x":              3253408680415108,   # NEW Small Squad Party 2.0 5X Guests
+    "room":                1493932377935748,   # Room Upgrade
+    "suite":               5997532005306244,   # Suite Upgrade
+    "up_membership":        930982424514436,   # Unlimited Play 12-Month MTM Membership
+    "parent_membership":   5434582051884932,   # Parent Membership
+    "shorty40_membership": 3182782238199684,   # Shorty 40 Membership
 }
 
 GRID_COLS = {"tier": "Birthday Tier", "promo": "Promo Name"}
