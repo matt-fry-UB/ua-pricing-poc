@@ -100,11 +100,12 @@ module.exports = async function handler(req, res) {
     const response = {
       slug: locationSlug,
       park: {
-        id:      parkId,
-        name:    park.name,
+        id:        parkId,
+        name:      park.name,
         city,
-        state:   statePart,
-        urlSlug: park.urlSlug || null,
+        state:     statePart,
+        urlSlug:   park.urlSlug || null,
+        CCurlSlug: park.urlSlug || null,
       },
       links: {
         tickets:    `https://ua-pricing-poc.vercel.app/${locationSlug}`,
