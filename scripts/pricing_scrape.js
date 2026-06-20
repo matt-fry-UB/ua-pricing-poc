@@ -78,6 +78,11 @@ async function scrapeTickets(page, name, url) {
       }
     });
 
+    // Adventure 4 All promo checks
+    const bodyText = document.body.innerText;
+    out.a4aSimplifiedFound = bodyText.includes('(4) Unlimited Play+ Tickets');
+    out.a4aLegacyFound     = bodyText.includes('(4) Unlimited Play Tickets');
+
     return out;
   });
 
@@ -180,10 +185,12 @@ async function scrapeOffers(page, name, url) {
 
     return {
       location: locationName,
-      smallSquadPrice: priceMatch ? '$' + priceMatch[1] : null,
-      partyTimeFound:  bodyText.includes('PARTY-TIME'),
-      save100Found:    bodyText.includes('SAVE-100'),
+      smallSquadPrice:     priceMatch ? '$' + priceMatch[1] : null,
+      partyTimeFound:      bodyText.includes('PARTY-TIME'),
+      save100Found:        bodyText.includes('SAVE-100'),
       smallSquadHostFound: bodyText.toLowerCase().includes('shared party host'),
+      a4aSimplifiedFound:  bodyText.includes('(4) Unlimited Play+ Tickets'),
+      a4aLegacyFound:      bodyText.includes('(4) Unlimited Play Tickets'),
     };
   }, name);
 }

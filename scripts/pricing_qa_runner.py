@@ -46,6 +46,7 @@ SKIP_ITEMS = {
 CC_SKIP_ITEMS = {
     "$100/25% Off Birthday Promo",
     "$100/25% Off Birthday Promo Discount",
+    "Adventure 4 All",
 }
 
 
@@ -267,6 +268,22 @@ def map_web_to_qa(scrape):
     host_found = bday.get("smallSquadHostFound") or off.get("smallSquadHostFound")
     out["Small Squad Promo"]       = "shared party host" if host_found else None
     out["Small Squad Promo Price"] = off.get("smallSquadPrice")
+
+    # Adventure 4 All: simplified version must be on BOTH location and offers pages,
+    # legacy version must be on NEITHER
+    loc_simplified = tix.get("a4aSimplifiedFound", False)
+    loc_legacy     = tix.get("a4aLegacyFound",     False)
+    off_simplified = off.get("a4aSimplifiedFound", False)
+    off_legacy     = off.get("a4aLegacyFound",     False)
+    if loc_simplified and off_simplified and not loc_legacy and not off_legacy:
+        out["Adventure 4 All"] = "PASS"
+    else:
+        issues = []
+        if not loc_simplified: issues.append("simplified missing on location page")
+        if loc_legacy:         issues.append("legacy promo on location page")
+        if not off_simplified: issues.append("simplified missing on offers page")
+        if off_legacy:         issues.append("legacy promo on offers page")
+        out["Adventure 4 All"] = "FAIL: " + "; ".join(issues)
 
     # Membership page
     out["Unlimited Play Membership"] = mem.get("upPrice")
