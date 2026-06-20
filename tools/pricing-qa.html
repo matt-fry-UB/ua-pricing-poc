@@ -198,6 +198,20 @@
     .log-line.err  { color: #fca5a5; }
     .log-line.warn { color: #fde68a; }
     .log-line.ok   { color: #6ee7b7; }
+    .instr-section { margin-top: 22px; }
+    .instr-section + .instr-section { border-top: 1px solid var(--g200); padding-top: 20px; }
+    .instr-heading {
+      font-family: 'Oswald', sans-serif;
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: .4px;
+      margin-bottom: 10px;
+      color: var(--black);
+    }
+    .instr-section p { font-size: 14px; line-height: 1.65; color: var(--g700); margin-bottom: 10px; }
+    .instr-section p:last-child { margin-bottom: 0; }
+    .instr-section a { color: var(--black); font-weight: 700; text-decoration: underline; }
+    .instr-section a:hover { opacity: .7; }
   </style>
 </head>
 <body>
@@ -207,8 +221,33 @@
   </header>
 
   <main>
-    <!-- ── Card 1: Sync Smartsheet ── -->
+    <!-- ── Instructions ── -->
     <div class="card">
+      <h2>Instructions</h2>
+      <p class="desc">
+        Use this page to sync the data on <a href="https://app.smartsheet.com/sheets/XJx22MfpCGGwgrhWRmxc8Fq9QM9RvXvFggjjc8W1" target="_blank">UA Simplified Pricing QA Checklist</a>.
+        Uncheck the "Write to Smartsheet" box to do a dry run and preview the changes, but there's no real downside to just letting it write.
+      </p>
+
+      <div class="instr-section">
+        <h3 class="instr-heading">Sync Smartsheet</h3>
+        <p>If any changes are made to the <a href="https://app.smartsheet.com/sheets/MjJ8Gjhjv486gCR3hcF4gWVvC3FpvC2xJ4M5HWg1?view=grid" target="_blank">Simplified Pricing Rollout (2026)</a> sheet, then run the <a href="#sync-card">Sync Smartsheet</a> process. For the most part, that source sheet should not change, so you probably won't need to run this.</p>
+      </div>
+
+      <div class="instr-section">
+        <h3 class="instr-heading">Run QA Checklist</h3>
+        <p>Once you hear from the CC team that a location is ready for web QA, you can run the <a href="#qa-card">QA Checklist</a> process. Check the box for any location(s) in the list and click the Run Pricing QA button. Then wait for the process to finish — it should take 3–5 minutes depending on how many locations you check.</p>
+        <p>Once it is complete, open the <a href="https://app.smartsheet.com/sheets/XJx22MfpCGGwgrhWRmxc8Fq9QM9RvXvFggjjc8W1" target="_blank">UA Simplified Pricing QA Checklist</a> and look for any rows with mismatches indicated. If there is no mismatch for an item, you will also need to manually check the box in the "Done" column to mark it as complete.</p>
+        <p>For any items with a mismatch, use the link in the "Edit Location" column to open the section inside WordPress where you can search for and edit that location.</p>
+        <p>After you update a location (or set of locations) in WordPress, you will need to clear the caches using the "WP Rocker", "Clear Divi Cache", and "WP Engine Quick Links" tabs at the top of the page. Wait 2–5 minutes for the caches to fully clear.</p>
+        <p>After you clear the caches, you will need to refresh the Next.js pages using the <a href="https://urbanair.vercel.app/refresh.html" target="_blank">Refresh the Urban Air website</a> button. This process will also take 2–5 minutes.</p>
+        <p>Once the pages have refreshed and your WordPress updates are visible on the live site, run the <a href="#qa-card">QA Checklist</a> process again to make sure the mismatched items have been corrected.</p>
+        <p>Repeat this process until all locations are green.</p>
+      </div>
+    </div>
+
+    <!-- ── Card 1: Sync Smartsheet ── -->
+    <div id="sync-card" class="card">
       <h2>Sync Smartsheet</h2>
       <p class="desc">
         Pulls the latest reference values from the Simplified Pricing Rollout sheet and
@@ -218,15 +257,15 @@
       <div id="sync-last-run" class="last-run">Last run: checking...</div>
       <hr class="divider" />
       <div class="toggle-row">
-        <input type="checkbox" id="sync-execute" />
+        <input type="checkbox" id="sync-execute" checked />
         <label for="sync-execute">Write changes to Smartsheet</label>
-        <span class="dry-run-note">(leave unchecked to preview without writing)</span>
+        <span class="dry-run-note">(uncheck to preview without writing)</span>
       </div>
       <button id="sync-btn" class="btn-primary" onclick="runSync()">Sync Smartsheet</button>
     </div>
 
     <!-- ── Card 2: Run Pricing QA ── -->
-    <div class="card">
+    <div id="qa-card" class="card">
       <h2>Run Pricing QA</h2>
       <p class="desc">
         Fetches live pricing from the Command Center API and the Urban Air website for
@@ -246,9 +285,9 @@
       </div>
 
       <div class="toggle-row">
-        <input type="checkbox" id="qa-execute" />
+        <input type="checkbox" id="qa-execute" checked />
         <label for="qa-execute">Write results to Smartsheet</label>
-        <span class="dry-run-note">(leave unchecked to dry run)</span>
+        <span class="dry-run-note">(uncheck to dry run)</span>
       </div>
       <button id="qa-btn" class="btn-primary" onclick="runQA()">Run Pricing QA</button>
     </div>
