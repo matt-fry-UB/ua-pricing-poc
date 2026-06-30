@@ -2,6 +2,11 @@
 // Returns names of Urban Air locations currently on simplified pricing,
 // using the same detectPricingModel logic as /api/location (ticket-based).
 // Cached for 1 hour; the parallel upstream calls only happen on cache miss.
+//
+// Parks are processed in batches to avoid flooding the upstream API with
+// hundreds of concurrent calendar requests (findLimitId makes 7 fetches per
+// park). Unbatched, ~700 simultaneous requests trigger rate limiting and
+// cause findLimitId to return null for many parks, producing false negatives.
 
 const {
   API,
@@ -13,6 +18,8 @@ const {
   HIDE_PRODUCT,
 } = require('./_shared');
 
+const BATCH_SIZE = 15;
+
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=7200');
@@ -20,24 +27,29 @@ module.exports = async function handler(req, res) {
   try {
     const parks = await loadParks();
 
-    const results = await Promise.allSettled(
-      parks.map(async park => {
-        const { limitId, date } = await findLimitId(park.id);
-        if (!limitId) return null;
+    const results = [];
+    for (let i = 0; i < parks.length; i += BATCH_SIZE) {
+      const batch = parks.slice(i, i + BATCH_SIZE);
+      const batchResults = await Promise.allSettled(
+        batch.map(async park => {
+          const { limitId, date } = await findLimitId(park.id);
+          if (!limitId) return null;
 
-        const json = await fetch(
-          `${API}/brands/${BRAND_ID}/parks/${park.id}/products` +
-          `?productTypeIds=2&date=${date}&parkAttendanceLimitId=${limitId}`
-        ).then(r => r.json());
+          const json = await fetch(
+            `${API}/brands/${BRAND_ID}/parks/${park.id}/products` +
+            `?productTypeIds=2&date=${date}&parkAttendanceLimitId=${limitId}`
+          ).then(r => r.json());
 
-        const allTickets    = json.data || [];
-        const primaryTickets = allTickets.filter(
-          t => !IS_SECONDARY(t.parkProductName) && !HIDE_PRODUCT(t.parkProductName)
-        );
-        const model = detectPricingModel(primaryTickets);
-        return model === 'simplified' ? park.name : null;
-      })
-    );
+          const allTickets    = json.data || [];
+          const primaryTickets = allTickets.filter(
+            t => !IS_SECONDARY(t.parkProductName) && !HIDE_PRODUCT(t.parkProductName)
+          );
+          const model = detectPricingModel(primaryTickets);
+          return model === 'simplified' ? park.name : null;
+        })
+      );
+      results.push(...batchResults);
+    }
 
     const names = results
       .filter(r => r.status === 'fulfilled' && r.value)
