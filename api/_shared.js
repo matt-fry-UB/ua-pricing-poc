@@ -75,7 +75,6 @@ const IS_GOKARTS = p =>
   (p.attractions || []).some(a => /go.?kart/i.test(a.name));
 
 function detectPricingModel(primaryTickets) {
-  if (primaryTickets.length >= 3) return 'legacy';
   if (primaryTickets.some(t => /\b(deluxe|ultimate|platinum)\b/i.test(t.parkProductName))) return 'legacy';
   return 'simplified';
 }
