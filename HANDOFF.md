@@ -358,9 +358,18 @@ Hidden if name matches: `/adventure\s*4\s*all|adventure\s*for\s*all|bring.a.frie
 #### `isSecondaryTicket(name)`
 Returns `true` for tickets that are add-ons, not main tickets. These are filtered out of the primary ticket list.
 
-Pattern: `/\b(parent|shorty)\b|\b5\s*(?:&amp;|&|and\b)?\s*under\b/i`
+Pattern: `/\b(parent|shorty)\b|short\s*y?\s*40|\b5\s*(?:&amp;|&|and\b)?\s*under\b/i`
 
-Matches: "Parent Ticket", "Shorty", "Shorty 40", "5 & Under", "5 and Under", "5&Under"
+Matches: "Parent Ticket", "Shorty", "Shorty 40", "5 & Under", "5 and Under", "5&Under" — plus the misspellings "Short 40" and "Shorty40" that exist in CC data at some parks.
+
+---
+
+#### `isPrimaryTicket(name)` / `IS_PRIMARY(name)`
+Allowlist of main ticket names. Only tickets matching this pattern are treated as primary; anything that is neither primary nor secondary is a **promo ticket** (e.g. "America's 250th Celebration", "Camp Urbie", "Double Play BOGO") and is not rendered as a ticket cell. The API returns promo tickets in a separate `pricing.promoTickets` field.
+
+Pattern: `/unlimited play|\b(deluxe|ultimate|platinum)\b/i`
+
+Matches: "Unlimited Play", "Unlimited Play +", "Deluxe", "Ultimate", "Platinum"
 
 ---
 
@@ -479,16 +488,17 @@ Examples:
 
 ### 2.7 Pricing Model Detection
 
-**Input:** `primaryTickets` — all tickets after filtering out secondary tickets (parent, shorty, 5 & under).
+**Input:** `primaryTickets` — tickets matching the `isPrimaryTicket` allowlist, minus secondary tickets (parent, shorty, 5 & under). Promo tickets never reach this function.
 
-**Rules (checked in order):**
-1. If `primaryTickets.length >= 3` → **legacy**
-2. If any ticket name matches `/\b(deluxe|ultimate|platinum)\b/i` → **legacy**
-3. Otherwise → **simplified**
+**Rules:**
+1. If any ticket name matches `/\b(deluxe|ultimate|platinum)\b/i` → **legacy**
+2. Otherwise → **simplified**
+
+(There is deliberately no ticket-count rule: promos can add a third ticket to simplified parks, so counting tickets misclassifies them.)
 
 **Implications:**
 - `simplified`: 1 or 2 primary tickets. The cheapest is "Unlimited Play" (base). The most expensive (if different from base AND is a go-karts ticket) is "Unlimited Play +".
-- `legacy`: 3 or more primary tickets, sorted by price ascending. Each displayed as a tier cell.
+- `legacy`: primary tickets are Deluxe/Ultimate/Platinum tiers, sorted by price ascending. Each displayed as a tier cell.
 
 ---
 
@@ -499,8 +509,9 @@ The entire tickets tab renders inside one component (the "simplified pricing wra
 **Step 1 — Classify tickets:**
 ```
 secondary = tickets where isSecondaryTicket(name) === true
-primary   = tickets where isSecondaryTicket(name) === false
+primary   = tickets where isPrimaryTicket(name) === true && isSecondaryTicket(name) === false
 model     = detectPricingModel(primary)   // 'simplified' | 'legacy'
+// tickets that are neither primary nor secondary are promos — not rendered
 isLegacy  = model === 'legacy'
 sortedByPrice = [...primary].sort ascending by price
 goKartsOn = !isLegacy && primary.some(t => isGoKartsTicket(t))
@@ -1348,7 +1359,7 @@ Alternatively, Tailwind CSS v4 works well — the design reference (`pricing-sec
 6. **Sort parks** by state abbreviation then city, both alphabetically, before rendering dropdown.
 7. **Hide/filter products** matching `hideProduct()` regex before any rendering.
 8. **Background pre-fetch:** After the active tab renders, silently pre-fetch the other two tabs. This is important for perceived performance.
-9. **Pricing model detection uses `primary` tickets only** (after filtering out secondary tickets). Do not run `detectPricingModel()` on the raw ticket array.
+9. **Pricing model detection uses `primary` tickets only** (the `isPrimaryTicket` allowlist minus secondary tickets — promo tickets excluded). Do not run `detectPricingModel()` on the raw ticket array.
 10. **The "5 & Under" product** is treated as a secondary ticket (same as Shorty/Parent). It appears in the add-on cards section, not as a main ticket cell.
 
 ---
