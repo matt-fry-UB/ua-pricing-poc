@@ -68,7 +68,14 @@ const HIDE_PRODUCT = name =>
   /adventure\s*4\s*all|adventure\s*for\s*all|bring.a.friend.friday/i.test(name);
 
 const IS_SECONDARY = name =>
-  /\b(parent|shorty)\b|\b5\s*(?:&amp;|&|and)?\s*under\b/i.test(name);
+  /\b(parent|shorty)\b|short\s*y?\s*40|\b5\s*(?:&amp;|&|and)?\s*under\b/i.test(name);
+
+// Allowlist of primary ticket names. Anything else that isn't secondary is
+// treated as a promo ticket (e.g. "America's 250th Celebration") and kept
+// out of the primary tickets list. "unlimited play" covers both
+// "Unlimited Play" and "Unlimited Play +".
+const IS_PRIMARY = name =>
+  /unlimited play|\b(deluxe|ultimate|platinum)\b/i.test(name);
 
 const IS_GOKARTS = p =>
   /go.?kart|unlimited play\s*\+/i.test(p.parkProductName) ||
@@ -115,6 +122,7 @@ module.exports = {
   findLimitId,
   HIDE_PRODUCT,
   IS_SECONDARY,
+  IS_PRIMARY,
   IS_GOKARTS,
   detectPricingModel,
   stripSuffix,

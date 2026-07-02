@@ -10,6 +10,7 @@ const {
   findLimitId,
   HIDE_PRODUCT,
   IS_SECONDARY,
+  IS_PRIMARY,
   IS_GOKARTS,
   detectPricingModel,
   stripSuffix,
@@ -72,8 +73,9 @@ module.exports = async function handler(req, res) {
     const cleanAnnual = cleanStrip(annualPasses).filter(p => !HIDE_PRODUCT(p.parkProductName));
 
     // Classify tickets
-    const primaryTickets   = tickets.filter(t => !IS_SECONDARY(t.parkProductName));
+    const primaryTickets   = tickets.filter(t => IS_PRIMARY(t.parkProductName) && !IS_SECONDARY(t.parkProductName));
     const secondaryTickets = tickets.filter(t => IS_SECONDARY(t.parkProductName));
+    const promoTickets     = tickets.filter(t => !IS_PRIMARY(t.parkProductName) && !IS_SECONDARY(t.parkProductName));
     const goKartsTicket    = primaryTickets.find(IS_GOKARTS) || null;
     const pricingModel     = detectPricingModel(primaryTickets);
 
@@ -118,6 +120,7 @@ module.exports = async function handler(req, res) {
         pricingDate:      date || null,
         tickets:          primaryTickets.map(formatProduct),
         secondaryTickets: secondaryTickets.map(formatProduct),
+        promoTickets:     promoTickets.map(formatProduct),
         goKartsIncluded:  !!goKartsTicket,
         memberships:      cleanMem.map(formatProduct),
         annualPasses:     cleanAnnual.map(formatProduct),

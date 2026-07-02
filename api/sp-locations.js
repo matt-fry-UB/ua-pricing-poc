@@ -15,6 +15,7 @@ const {
   findLimitId,
   detectPricingModel,
   IS_SECONDARY,
+  IS_PRIMARY,
   HIDE_PRODUCT,
 } = require('./_shared');
 
@@ -42,7 +43,9 @@ module.exports = async function handler(req, res) {
 
           const allTickets    = json.data || [];
           const primaryTickets = allTickets.filter(
-            t => !IS_SECONDARY(t.parkProductName) && !HIDE_PRODUCT(t.parkProductName)
+            t => IS_PRIMARY(t.parkProductName) &&
+                 !IS_SECONDARY(t.parkProductName) &&
+                 !HIDE_PRODUCT(t.parkProductName)
           );
           const model = detectPricingModel(primaryTickets);
           return model === 'simplified' ? park.name : null;
