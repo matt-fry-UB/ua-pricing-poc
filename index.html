@@ -1037,7 +1037,10 @@ async function findLimitId(parkId, stepEl) {
 }
 
 /* ─── Pricing model helpers ─── */
-const isSecondaryTicket = name => /\b(parent|shorty)\b|\b5\s*(?:&amp;|&|and\b)?\s*under\b/i.test(name);
+const isSecondaryTicket = name => /\b(parent|shorty)\b|short\s*y?\s*40|\b5\s*(?:&amp;|&|and\b)?\s*under\b/i.test(name);
+// Allowlist of primary ticket names (mirrors IS_PRIMARY in api/_shared.js).
+// Anything else that isn't secondary is a promo ticket and is not rendered.
+const isPrimaryTicket   = name => /unlimited play|\b(deluxe|ultimate|platinum)\b/i.test(name);
 const isGoKartsTicket   = t => /go.?kart|unlimited play\s*\+/i.test(t.parkProductName)
   || (t.attractions || []).some(a => /go.?kart/i.test(a.name));
 
@@ -1446,7 +1449,7 @@ function renderTickets({ tickets, merch, memberships, attractions, wpAttractions
     : '#';
 
   const secondary    = tickets.filter(p =>  isSecondaryTicket(p.parkProductName));
-  const primary      = tickets.filter(p => !isSecondaryTicket(p.parkProductName));
+  const primary      = tickets.filter(p =>  isPrimaryTicket(p.parkProductName) && !isSecondaryTicket(p.parkProductName));
   const model        = detectPricingModel(primary);
   const isLegacy     = model === 'legacy';
   const sortedByPrice= [...primary].sort((a, b) => a.price - b.price);
