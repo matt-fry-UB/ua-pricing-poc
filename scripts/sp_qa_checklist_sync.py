@@ -37,6 +37,20 @@ Modes
       no Mismatch flags; Red = all Done but a Mismatch exists; Yellow = in
       progress; blank = not started). populate sets it on new locations
       automatically; this backfills existing parents. Safe to re-run.
+  python sp_qa_checklist_sync.py apply-template               # DRY RUN
+  python sp_qa_checklist_sync.py apply-template --execute     # replicate the
+      Akron template to every location: add missing QA Item rows (e.g.
+      "Adventure 4 All") and backfill Edit Location, Notes / Instructions
+      (GTM rows), and CC URL Slug (GTM rows, set to =[CC Slug]@row).
+      Idempotent; never modifies Detail on existing rows and never touches
+      Done, QA By, QA Timestamp, Command Center, Website, Mismatch, or
+      Reference Value (the comparison tool owns those).
+  python sp_qa_checklist_sync.py apply-hyperlinks             # DRY RUN
+  python sp_qa_checklist_sync.py apply-hyperlinks --execute   # copy cell
+      hyperlinks from the reference location (Akron) to the matching QA Item
+      rows of every other location, for the Edit Location and Notes /
+      Instructions columns. Smartsheet allows one hyperlink per cell.
+      Idempotent; writes only the cell value + hyperlink.
   Add --cell-links to populate/sync to convert direct-source Reference
   Value cells (and parent SP Launch Date) into live Smartsheet cell links.
   Go-Karts Yes/No and the Birthday Promo lookup stay script-synced.
@@ -100,6 +114,30 @@ VERIFIED_FORMULA = ('=IF(COUNT(CHILDREN([QA Item]@row)) = 0, "", '
                     'IF(COUNTIF(CHILDREN(Done@row), 1) = 0, "", "Yellow"), '
                     'IF(COUNTIF(CHILDREN(Mismatch@row), <>"") = 0, "Green", "Red")))')
 
+# --- Akron template additions: new columns (resolved by title) ---------------
+EDIT_LOC_COL_TITLE = "Edit Location"
+CC_URL_SLUG_COL_TITLE = "CC URL Slug"
+NOTES_INSTR_COL_TITLE = "Notes / Instructions"
+
+# Edit Location value shared by all promo items (and Adventure 4 All).
+EDIT_LOC_PROMO = ("Location+Bday: https://www.urbanair.com/wp-admin/edit.php?post_type=promotion\n"
+                  "Offers: https://www.urbanair.com/wp-admin/edit.php?post_type=promotions")
+# Notes / Instructions text for the two GTM rows (constant across locations).
+NOTES_TRIGGERS = ("Add CC URL Slug (from the column to the left) to page path regex in both "
+                  "GTM triggers listed below.\nGTM Triggers Page:\n"
+                  "https://tagmanager.google.com/#/container/accounts/2103147720/containers/"
+                  "57046153/workspaces/231/triggers\nTrigger Names:\n"
+                  "[UA Exp] - Bday Ultimate to Unlimited (Dom)\n"
+                  "[UA Exp] - Bday Ultimate to Unlimited (Hist)")
+NOTES_TAGS = ("Add CC URL Slug (from the column to the left) to fiveKidLocations list inside "
+              "the GTM custom HTML tag listed below.\nGTM Tags Page:\n"
+              "https://tagmanager.google.com/#/container/accounts/2103147720/containers/"
+              "57046153/workspaces/231/tags\nTag Name:\n[UA Exp] - Bday Small Squad Party")
+
+ADVENTURE_4_ALL_DETAIL = ('Adventure 4 All promo updated to simplified pricing '
+                          '(legacy promo: gif image, "(4) Unlimited Play Tickets"; '
+                          'simplified promo: jpg image, "(4) Unlimited Play+ Tickets")')
+
 # Rollout sheet column IDs — immune to column renames.
 # Run `list-rollout-cols` to verify or update these if columns are deleted/recreated.
 ROLLOUT_COLS = {
@@ -122,7 +160,7 @@ ROLLOUT_COLS = {
 
 GRID_COLS = {"tier": "Birthday Tier", "promo": "Promo Name"}
 
-# Checklist template (23 items): (item, detail, rollout_key or None, source label or None)
+# Checklist template (24 items): (item, detail, rollout_key or None, source label or None)
 CHECKLIST = [
     ("Unlimited Play Ticket", "Price in website and CC match", "up_ticket", "Unlimited Play Ticket"),
     ("Has Unlimited Play +?", "Does this location have Unlimited Play +?", "go_karts", "Go-Karts"),
@@ -147,7 +185,30 @@ CHECKLIST = [
     ("$100/25% Off Birthday Promo Discount", "Matches Smartsheet birthday grid tier and price listed in CC", "PROMO", "Birthday Grid Promo Name"),
     ("Small Squad Promo", "Moved to new simplified pricing SSP promo (5 kids, no pizza, shared party host)", None, None),
     ("Small Squad Promo Price", "Price matches column in simplified pricing rollout smartsheet and price listed in CC", "ssp_5x", "Small Squad Party 5X Guests"),
+    ("Adventure 4 All", ADVENTURE_4_ALL_DETAIL, None, None),
 ]
+
+# Per-item template values for the Akron-added columns, keyed by QA Item.
+# (edit_location, notes_instructions or None, needs_cc_url_slug)
+GROUP_TICKET = ("Unlimited Play Ticket", "Has Unlimited Play +?", "Unlimited Play + Ticket",
+                "Parent Pass", "Shorty 40", "Socks", "Ticket Attractions")
+GROUP_BIRTHDAY = ("Unlimited Play Birthday", "Birthday Attractions", "Private Room",
+                  "Private Room Amenities", "VIP Suite", "VIP Suite Amenities")
+GROUP_MEMBERSHIP = ("Unlimited Play Membership", "Shorty 40 Membership",
+                    "Parent Pass Membership", "Membership Attractions")
+GROUP_PROMO = ("$100/25% Off Birthday Promo", "$100/25% Off Birthday Promo Discount",
+               "Small Squad Promo", "Small Squad Promo Price", "Adventure 4 All")
+TEMPLATE_FIELDS = {}
+for _i in GROUP_TICKET:
+    TEMPLATE_FIELDS[_i] = ("Ticket", None, False)
+for _i in GROUP_BIRTHDAY:
+    TEMPLATE_FIELDS[_i] = ("Birthday", None, False)
+for _i in GROUP_MEMBERSHIP:
+    TEMPLATE_FIELDS[_i] = ("Membership", None, False)
+for _i in GROUP_PROMO:
+    TEMPLATE_FIELDS[_i] = (EDIT_LOC_PROMO, None, False)
+TEMPLATE_FIELDS["Ultimate to Unlimited (GTM)"] = ("GTM Triggers", NOTES_TRIGGERS, True)
+TEMPLATE_FIELDS["Small Squad Pop Up (GTM)"] = ("GTM Tags", NOTES_TAGS, True)
 
 CELL_LINKABLE = {"up_ticket", "up_plus", "parent_pass", "shorty40", "up_party",
                  "ssp_5x", "room", "suite", "up_membership", "parent_membership",
@@ -643,6 +704,221 @@ def mode_apply_verified(execute):
     print("Done.")
 
 
+def mode_apply_template(execute):
+    """Replicate the Akron template to every location: add any missing QA Item
+    rows (e.g. 'Adventure 4 All') and backfill the Edit Location, Notes /
+    Instructions (GTM rows), and CC URL Slug (GTM rows, set to the formula
+    =[CC Slug]@row) columns. Idempotent. Never modifies Detail on existing
+    rows, and never touches Done, QA By, QA Timestamp, Command Center,
+    Website, Mismatch, or Reference Value (the comparison tool owns those)."""
+    qa_sheet = get_sheet(QA_SHEET_ID)
+    cols = col_map(qa_sheet)
+    try:
+        edit_col = cols[EDIT_LOC_COL_TITLE]
+        ccurl_col = cols[CC_URL_SLUG_COL_TITLE]
+        notes_col = cols[NOTES_INSTR_COL_TITLE]
+    except KeyError as e:
+        sys.exit(f"ERROR: QA sheet missing expected column {e}; found {sorted(cols)}")
+    ccslug_col = cols.get("CC Slug")
+
+    qa_item_col = QA_COL["qa_item"]
+    detail_col = QA_COL["detail"]
+    source_col = QA_COL["source"]
+    locref_col = QA_COL["location_ref"]
+
+    parents, children = existing_sections(qa_sheet)
+    parent_to_name = {rid: name for name, rid in parents.items()}
+
+    # parent_id -> {qa_item_name: child_row_dict}
+    kids_by_parent = {}
+    for k in children:
+        name = parent_to_name.get(k["_parent_id"])
+        if name is None:
+            continue
+        kids_by_parent.setdefault(k["_parent_id"], {})[str(k.get(qa_item_col))] = k
+
+    # Source each item's Detail from an existing row in the sheet (e.g. Akron's
+    # Adventure 4 All row), so added rows replicate what's actually there rather
+    # than any hardcoded text. Falls back to the CHECKLIST default if absent.
+    existing_detail_by_item = {}
+    for k in children:
+        item_name = str(k.get(qa_item_col))
+        if item_name not in existing_detail_by_item and k.get(detail_col):
+            existing_detail_by_item[item_name] = k.get(detail_col)
+
+    CC_SLUG_FORMULA = "=[CC Slug]@row"
+
+    updates, adds = [], []
+    add_counts = {}
+    for parent_id, name in parent_to_name.items():
+        kids = kids_by_parent.get(parent_id, {})
+        for item, detail, _key, src in CHECKLIST:
+            edit_loc, notes, needs_cc = TEMPLATE_FIELDS.get(item, (None, None, False))
+            if item in kids:
+                kid = kids[item]
+                cells = []
+                # NOTE: Detail is intentionally NOT updated on existing rows.
+                if edit_loc and kid.get(edit_col) != edit_loc:
+                    cells.append({"columnId": edit_col, "value": edit_loc})
+                if notes and kid.get(notes_col) != notes:
+                    cells.append({"columnId": notes_col, "value": notes})
+                # CC URL Slug formula is idempotent: once set it evaluates to the
+                # row's CC Slug, so compare the displayed value to that to decide.
+                if needs_cc and ccslug_col is not None:
+                    if kid.get(ccurl_col) != kid.get(ccslug_col):
+                        cells.append({"columnId": ccurl_col, "formula": CC_SLUG_FORMULA})
+                if cells:
+                    updates.append({"id": kid["_row_id"], "cells": cells})
+            else:
+                # Missing item (chiefly 'Adventure 4 All'): create the row.
+                cells = [
+                    {"columnId": qa_item_col, "value": item},
+                    {"columnId": locref_col, "value": name},
+                ]
+                detail_to_use = existing_detail_by_item.get(item, detail)
+                if detail_to_use:
+                    cells.append({"columnId": detail_col, "value": detail_to_use})
+                if src:
+                    cells.append({"columnId": source_col, "value": src})
+                if edit_loc:
+                    cells.append({"columnId": edit_col, "value": edit_loc})
+                if notes:
+                    cells.append({"columnId": notes_col, "value": notes})
+                if needs_cc:
+                    cells.append({"columnId": ccurl_col, "formula": CC_SLUG_FORMULA})
+                adds.append({"parentId": parent_id, "toBottom": True, "cells": cells})
+                add_counts[item] = add_counts.get(item, 0) + 1
+
+    print(f"Locations:                     {len(parent_to_name)}")
+    print(f"Rows to ADD (missing items):   {len(adds)}")
+    for item, n in add_counts.items():
+        print(f"    + {item}: {n}")
+    print(f"Existing rows to UPDATE:       {len(updates)}")
+    if not execute:
+        print("\nDRY RUN. Re-run with --execute to write.")
+        return
+    # Adds first (so the new rows exist), then the column backfills.
+    # A single add-request can only target ONE parent (Smartsheet requires every
+    # row in the request to share the same location), so POST one group per parent.
+    adds_by_parent = {}
+    for a in adds:
+        adds_by_parent.setdefault(a["parentId"], []).append(a)
+    for n, (pid, group) in enumerate(adds_by_parent.items(), 1):
+        api("POST", f"/sheets/{QA_SHEET_ID}/rows", json=group)
+        if n % 25 == 0:
+            print(f"  ...added rows for {n}/{len(adds_by_parent)} locations")
+        time.sleep(REQUEST_PAUSE_SEC)
+    print(f"  added rows for {len(adds_by_parent)} locations; applying {len(updates)} updates")
+    put_rows_batched(updates)
+    print("Done.")
+
+
+# Location used as the source of truth for the template (its cells are copied
+# to every other location). Akron is the fully-built reference.
+REFERENCE_LOCATION = "Akron, OH"
+# Columns whose cell hyperlinks get replicated from the reference location.
+HYPERLINK_COL_TITLES = (EDIT_LOC_COL_TITLE, NOTES_INSTR_COL_TITLE)
+
+
+def mode_apply_hyperlinks(execute):
+    """Copy cell hyperlinks from the reference location (Akron) to the matching
+    QA Item rows of every other location, for the Edit Location and Notes /
+    Instructions columns. Smartsheet allows one hyperlink per cell; whatever
+    single hyperlink each reference cell holds is replicated verbatim.
+    Idempotent: a target cell is skipped if it already links to the same URL.
+    Only the cell value + hyperlink are written; nothing else is touched."""
+    qa_sheet = get_sheet(QA_SHEET_ID)
+    cols = col_map(qa_sheet)
+    link_cols = {cols[t]: t for t in HYPERLINK_COL_TITLES if t in cols}
+    if not link_cols:
+        sys.exit("ERROR: none of the hyperlink columns were found on the sheet.")
+    qa_item_col = QA_COL["task"]   # primary col holds location name on parents
+    item_col = QA_COL["qa_item"]
+
+    # Parse rows keeping full cell objects (value + hyperlink).
+    parents, rows_by_id = {}, {}
+    for r in qa_sheet["rows"]:
+        cellmap = {c["columnId"]: c for c in r.get("cells", [])}
+        rows_by_id[r["id"]] = {"parent_id": r.get("parentId"), "cells": cellmap}
+        if r.get("parentId") is None:
+            nm = cellmap.get(qa_item_col, {}).get("value")
+            if nm:
+                parents[str(nm)] = r["id"]
+    parent_to_name = {rid: n for n, rid in parents.items()}
+
+    # parent_id -> {qa_item_name: (row_id, cellmap)}
+    kids_by_parent = {}
+    for rid, info in rows_by_id.items():
+        if info["parent_id"] is None:
+            continue
+        name = parent_to_name.get(info["parent_id"])
+        if not name:
+            continue
+        item = str(info["cells"].get(item_col, {}).get("value"))
+        kids_by_parent.setdefault(info["parent_id"], {})[item] = (rid, info["cells"])
+
+    ref_pid = parents.get(REFERENCE_LOCATION)
+    if not ref_pid:
+        sys.exit(f"ERROR: reference location '{REFERENCE_LOCATION}' not found.")
+    ref_kids = kids_by_parent.get(ref_pid, {})
+
+    # Capture hyperlinks from the reference: {item: {col_id: (value, hyperlink)}}
+    template_links = {}
+    for item, (_rid, cells) in ref_kids.items():
+        for col_id in link_cols:
+            cell = cells.get(col_id)
+            hl = cell.get("hyperlink") if cell else None
+            if hl and hl.get("url"):
+                template_links.setdefault(item, {})[col_id] = (cell.get("value"), hl)
+
+    found = {link_cols[c]: 0 for c in link_cols}
+    for d in template_links.values():
+        for c in d:
+            found[link_cols[c]] += 1
+    print(f"Hyperlinks found on reference ({REFERENCE_LOCATION}):")
+    for title, n in found.items():
+        print(f"    {title}: {n} item row(s)")
+    if not template_links:
+        print("\nNo cell hyperlinks on the reference location's Edit Location /"
+              " Notes / Instructions cells. If those URLs are clickable in the UI,"
+              " they are auto-rendered plain text (already copied), not hyperlink"
+              " objects, so there is nothing to replicate.")
+        return
+
+    updates = []
+    for pid, name in parent_to_name.items():
+        if pid == ref_pid:
+            continue
+        kids = kids_by_parent.get(pid, {})
+        for item, coldata in template_links.items():
+            target = kids.get(item)
+            if not target:
+                continue
+            tgt_rid, tgt_cells = target
+            payload = []
+            for col_id, (val, hl) in coldata.items():
+                cur = tgt_cells.get(col_id, {})
+                cur_url = (cur.get("hyperlink") or {}).get("url")
+                if cur_url == hl.get("url"):
+                    continue  # idempotent
+                new_hl = {"url": hl["url"]}
+                if hl.get("label"):
+                    new_hl["label"] = hl["label"]
+                cell = {"columnId": col_id, "hyperlink": new_hl}
+                if val is not None:
+                    cell["value"] = val
+                payload.append(cell)
+            if payload:
+                updates.append({"id": tgt_rid, "cells": payload})
+
+    print(f"Target cells to update across other locations: {len(updates)} rows")
+    if not execute:
+        print("\nDRY RUN. Re-run with --execute to write.")
+        return
+    put_rows_batched(updates)
+    print("Done.")
+
+
 def make_cell_link_updates(kids_by_parent, data_by_parent):
     updates = []
     ref_col = QA_COL["ref"]
@@ -707,6 +983,7 @@ if __name__ == "__main__":
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("mode", choices=["populate", "sync", "migrate-task-column",
                                     "stamp-locations", "populate-slugs", "apply-verified",
+                                    "apply-template", "apply-hyperlinks",
                                     "list-rollout-cols"])
     p.add_argument("--execute", action="store_true",
                    help="actually write changes (default is dry run)")
@@ -725,6 +1002,10 @@ if __name__ == "__main__":
         mode_populate_slugs(args.execute, args.excel)
     elif args.mode == "apply-verified":
         mode_apply_verified(args.execute)
+    elif args.mode == "apply-template":
+        mode_apply_template(args.execute)
+    elif args.mode == "apply-hyperlinks":
+        mode_apply_hyperlinks(args.execute)
     elif args.mode == "list-rollout-cols":
         mode_list_rollout_cols()
     else:
